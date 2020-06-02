@@ -1,0 +1,9 @@
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7549315
+
+https://www.researchgate.net/publication/6578833_A_threshold-based_fall-detection_algorithm_using_a_bi-axial_gyroscope_sensor
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5334912
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6465471
+
+https://github.com/swift2891/Fall_Detection
