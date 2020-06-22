@@ -59,7 +59,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         if (mSensorAccelerometer == null) {
-            mTextSensorProximity.setText(sensor_error);
+            mTextSensorLinearAccelerationX.setText(sensor_error);
+            mTextSensorLinearAccelerationY.setText(sensor_error);
+            mTextSensorLinearAccelerationZ.setText(sensor_error);
         }
 
         if(mSensorGyroscope == null) {
