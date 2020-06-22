@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mSensorGyroscope;
     private double[] gravity = new double[3];
     private double[] linear_acceleration = new double[3];
+    private double totalSumVector = 0.0;
 
     // TextViews to display current sensor values
     private TextView mTextSensorLight;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView mTextSensorLinearAccelerationX;
     private TextView mTextSensorLinearAccelerationY;
     private TextView mTextSensorLinearAccelerationZ;
+    private TextView mTextSensorTotalSumVector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mTextSensorLinearAccelerationX = (TextView) findViewById(R.id.linear_acceleration_x);
         mTextSensorLinearAccelerationY = (TextView) findViewById(R.id.linear_acceleration_y);
         mTextSensorLinearAccelerationZ = (TextView) findViewById(R.id.linear_acceleration_z);
+        mTextSensorTotalSumVector = (TextView) findViewById(R.id.totalSumVector);
 
         mSensorProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -104,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mTextSensorProximity.setText(getResources().getString(R.string.label_proximity, currentValue));
                 break;
             case Sensor.TYPE_ACCELEROMETER:
-                // TODO: CALCULATE SV
+
                 final double alpha = 0.8;
 
                 // Isolate the force of gravity with the low-pass filter.
@@ -119,7 +122,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, linear_acceleration[0]));
                 mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, linear_acceleration[1]));
                 mTextSensorLinearAccelerationZ.setText(getResources().getString(R.string.linear_acceleration_z, linear_acceleration[2]));
-
+                totalSumVector = Math.sqrt((linear_acceleration[0] * linear_acceleration[0]) + (linear_acceleration[1] * linear_acceleration[1])
+                + (linear_acceleration[2] * linear_acceleration[2]));
+                mTextSensorTotalSumVector.setText(getResources().getString(R.string.totalSumVector, totalSumVector));
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 //TODO: DO SOMETHING, CALCULATE TILT
@@ -131,4 +136,5 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
+
 }

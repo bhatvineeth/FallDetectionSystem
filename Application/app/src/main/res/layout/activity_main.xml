@@ -50,5 +50,13 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_y" />
 
+    <TextView
+        android:id="@+id/totalSumVector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/totalSumVector"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_z" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
