@@ -1,4 +1,4 @@
-package com.ssns.faultdetectionsystem;
+package com.ssns.falldetectionsystem;
 
 import org.junit.Test;
 
