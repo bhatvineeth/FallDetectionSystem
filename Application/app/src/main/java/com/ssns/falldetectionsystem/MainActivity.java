@@ -137,4 +137,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    public void initiate(){
+
+    }
+
+    public void detectFall(){
+// Falldetection class
+    }
+
+    public void triggerAlert(){
+
+    }
+
+    public void userAcknowledgment(){
+
+    }
+
+    public void  saveDetails(){
+   // User has details
+    }
+
 }
