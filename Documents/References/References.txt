@@ -7,3 +7,7 @@ https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5334912
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6465471
 
 https://github.com/swift2891/Fall_Detection
+
+https://www.researchgate.net/publication/312266196_Automatic_Fall_Detection_using_Smartphone_Acceleration_Sensor
+
+https://link.springer.com/article/10.1186/s13678-016-0004-1
