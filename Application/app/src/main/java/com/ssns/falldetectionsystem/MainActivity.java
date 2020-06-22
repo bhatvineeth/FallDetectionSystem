@@ -10,11 +10,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import static android.util.Half.EPSILON;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager mSensorManager;
     // Individual light and proximity sensors.
-    private Sensor mSensorProximity;
     private Sensor mSensorLight;
     private Sensor mSensorAccelerometer;
     private Sensor mSensorGyroscope;
@@ -24,11 +25,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // TextViews to display current sensor values
     private TextView mTextSensorLight;
-    private TextView mTextSensorProximity;
     private TextView mTextSensorLinearAccelerationX;
     private TextView mTextSensorLinearAccelerationY;
     private TextView mTextSensorLinearAccelerationZ;
     private TextView mTextSensorTotalSumVector;
+
+    private TextView mRotationX;
+    private TextView mRotationY;
+    private TextView mRotationZ;
+    private TextView mAngularVelocity;
+
+    private static final float NS2S = 1.0f / 1000000000.0f;
+    private final float[] deltaRotationVector = new float[4];
+    private float timestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +46,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         mTextSensorLight = (TextView) findViewById(R.id.label_light);
-        mTextSensorProximity = (TextView) findViewById(R.id.label_proximity);
         mTextSensorLinearAccelerationX = (TextView) findViewById(R.id.linear_acceleration_x);
         mTextSensorLinearAccelerationY = (TextView) findViewById(R.id.linear_acceleration_y);
         mTextSensorLinearAccelerationZ = (TextView) findViewById(R.id.linear_acceleration_z);
         mTextSensorTotalSumVector = (TextView) findViewById(R.id.totalSumVector);
 
-        mSensorProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mRotationX = (TextView) findViewById(R.id.rotation_x);
+        mRotationY = (TextView) findViewById(R.id.rotation_y);
+        mRotationZ = (TextView) findViewById(R.id.rotation_z);
+        mAngularVelocity =  (TextView) findViewById(R.id.angular_velocity);
+
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -54,10 +66,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mTextSensorLight.setText(sensor_error);
         }
 
-        if (mSensorProximity == null) {
-            mTextSensorProximity.setText(sensor_error);
-        }
-
         if (mSensorAccelerometer == null) {
             mTextSensorLinearAccelerationX.setText(sensor_error);
             mTextSensorLinearAccelerationY.setText(sensor_error);
@@ -65,7 +73,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         if(mSensorGyroscope == null) {
-            // TODO: SET VALUE IN XML
+            mRotationX.setText(sensor_error);
+            mRotationY.setText(sensor_error);
+            mRotationZ.setText(sensor_error);
         }
     }
 
@@ -73,10 +83,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onStart() {
         super.onStart();
 
-        if (mSensorProximity != null) {
-            mSensorManager.registerListener(this, mSensorProximity,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
         if (mSensorLight != null) {
             mSensorManager.registerListener(this, mSensorLight,
                     SensorManager.SENSOR_DELAY_NORMAL);
@@ -105,9 +111,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mTextSensorLight.setText(getResources().getString(
                         R.string.label_light, currentValue));
                 break;
-            case Sensor.TYPE_PROXIMITY:
-                mTextSensorProximity.setText(getResources().getString(R.string.label_proximity, currentValue));
-                break;
             case Sensor.TYPE_ACCELEROMETER:
 
                 final double alpha = 0.8;
@@ -129,7 +132,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mTextSensorTotalSumVector.setText(getResources().getString(R.string.totalSumVector, totalSumVector));
                 break;
             case Sensor.TYPE_GYROSCOPE:
-                //TODO: DO SOMETHING, CALCULATE TILT
+
+                float axisX = event.values[0];
+                float axisY = event.values[1];
+                float axisZ = event.values[2];
+
+                float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+
+                if (omegaMagnitude > EPSILON) {
+                    axisX /= omegaMagnitude;
+                    axisY /= omegaMagnitude;
+                    axisZ /= omegaMagnitude;
+                }
+
+                int inclinationX = (int) Math.round(Math.toDegrees(Math.acos(axisX)));
+                int inclinationY = (int) Math.round(Math.toDegrees(Math.acos(axisY)));
+                int inclinationZ = (int) Math.round(Math.toDegrees(Math.acos(axisZ)));
+
+                mRotationX.setText(getResources().getString(R.string.rotation_x, inclinationX));
+                mRotationY.setText(getResources().getString(R.string.rotation_y, inclinationY));
+                mRotationZ.setText(getResources().getString(R.string.rotation_z, inclinationZ));
+
+                mAngularVelocity.setText(getResources().getString(R.string.angular_velocity, omegaMagnitude));
+
+                break;
             default:
                 // do nothing
         }

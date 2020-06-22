@@ -58,5 +58,37 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_z" />
 
+    <TextView
+        android:id="@+id/rotation_x"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rotation_x"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalSumVector" />
+
+    <TextView
+        android:id="@+id/rotation_y"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rotation_y"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rotation_x" />
+
+    <TextView
+        android:id="@+id/rotation_z"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rotation_z"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rotation_y" />
+
+    <TextView
+        android:id="@+id/angular_velocity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/angular_velocity"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rotation_z" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

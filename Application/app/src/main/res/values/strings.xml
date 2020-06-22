@@ -1,12 +1,17 @@
 <resources>
-    <string name="app_name">Fault Detection System</string>
+    <string name="app_name">Fall Detection System</string>
     <string name="error_no_sensor">No sensor</string>
     <string name="label_light">Light Sensor: %1$.2f</string>
     <string name="label_proximity">Proximity Sensor: %1$.2f</string>
     <string name="linear_acceleration_x">Linear Acceleration X: %1$.2f</string>
     <string name="linear_acceleration_y">Linear Acceleration Y: %1$.2f</string>
     <string name="linear_acceleration_z">Linear Acceleration Z: %1$.2f</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="totalSumVector">Total Sum Vector : %1$.2f</string>
+    <string name="rotation_x">Rotation X: %d</string>
+    <string name="rotation_y">Rotation Y: %d</string>
+    <string name="rotation_z">Rotation Z: %d</string>
+    <string name="angular_velocity">Angular: %1$.2f</string>
+    <string name="title_activity_main">MainActivity</string>
+
 </resources>
 
