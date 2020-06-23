@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,8 +9,22 @@
     tools:context=".MainActivity"
     tools:visibility="visible">
 
+    <Button
+        android:text="@string/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/login"
+        android:layout_marginTop="10dp" />
 
-    <TextView
+    <Button
+        android:text="@string/logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logout"
+        android:layout_marginTop="10dp" />
+
+
+    <!-- <TextView
         android:id="@+id/label_light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -88,7 +102,7 @@
         android:layout_height="wrap_content"
         android:text="@string/angular_velocity"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotation_z" />
+        app:layout_constraintTop_toBottomOf="@+id/rotation_z" /> -->
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

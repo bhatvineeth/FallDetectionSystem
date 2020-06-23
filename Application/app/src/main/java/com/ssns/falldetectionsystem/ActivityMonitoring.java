@@ -101,9 +101,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                 linear_acceleration[0] = event.values[0] - gravity[0];
                 linear_acceleration[1] = event.values[1] - gravity[1];
                 linear_acceleration[2] = event.values[2] - gravity[2];
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationX: " + linear_acceleration[0]);
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationY: " + linear_acceleration[1]);
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationZ: " + linear_acceleration[2]);
+                Log.d("Activity Monitoring","mTextSensorLinearAccelerationX: " + linear_acceleration[0]);
+                Log.d("Activity Monitoring","mTextSensorLinearAccelerationY: " + linear_acceleration[1]);
+                Log.d("Activity Monitoring","mTextSensorLinearAccelerationZ: " + linear_acceleration[2]);
                 //mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, linear_acceleration[0]));
                 //mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, linear_acceleration[1]));
                 //mTextSensorLinearAccelerationZ.setText(getResources().getString(R.string.linear_acceleration_z, linear_acceleration[2]));
@@ -148,7 +148,11 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     }
 
-    protected void onStop() {
+    @Override
+    public boolean stopService(Intent name) {
         mSensorManager.unregisterListener(this);
+        timer.cancel();
+        return super.stopService(name);
     }
+
 }

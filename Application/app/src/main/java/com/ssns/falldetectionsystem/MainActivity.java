@@ -7,6 +7,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     //private TextView mAngularVelocity;
 
+    private Button login, logout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        login = (Button) findViewById(R.id.login);
+        logout = (Button) findViewById(R.id.logout);
         //mTextSensorLight = (TextView) findViewById(R.id.label_light);
         //mTextSensorLinearAccelerationX = (TextView) findViewById(R.id.linear_acceleration_x);
         //mTextSensorLinearAccelerationY = (TextView) findViewById(R.id.linear_acceleration_y);
@@ -42,12 +48,25 @@ public class MainActivity extends AppCompatActivity {
         //mRotationZ = (TextView) findViewById(R.id.rotation_z);
         //mAngularVelocity =  (TextView) findViewById(R.id.angular_velocity);
 
-        //TODO: CHECK LOGIN, THEN START SERVICE
-        Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
-        startService(intent);
 
-        //TODO: ON LONGOUT STOP TRACKING
-        //stopService(intent);
+        //TODO: CHECK LOGIN, THEN START SERVICE
+        login.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
+                startService(intent);
+            }
+        });
+
+        //TODO: ON LOGOUT STOP TRACKING
+        logout.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
+
+                stopService(intent);
+            }
+        });
     }
 
 

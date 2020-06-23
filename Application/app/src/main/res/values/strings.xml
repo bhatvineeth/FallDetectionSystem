@@ -13,5 +13,8 @@
     <string name="angular_velocity">Angular: %1$.2f</string>
     <string name="title_activity_main">MainActivity</string>
 
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+
 </resources>
 
