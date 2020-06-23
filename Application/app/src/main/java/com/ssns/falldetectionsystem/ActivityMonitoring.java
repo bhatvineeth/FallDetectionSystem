@@ -25,8 +25,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private Timer timer = new Timer();
     private double[] gravity = new double[3];
     private double[] linear_acceleration = new double[3];
-    private double totalSumVector = 0.0;
+    private static double totalSumVector = 0.0;
     public static final int TIME_CONSTANT = 30;
+    private static double mAngularVelocity=20;
 
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final float[] deltaRotationVector = new float[4];
@@ -359,6 +360,15 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         mSensorManager.unregisterListener(this);
         timer.cancel();
         return super.stopService(name);
+    }
+
+
+    public static double getTotalSumVector(){
+        return totalSumVector;
+    }
+
+    public static double getmAngularVelocity(){
+        return mAngularVelocity;
     }
 
 }
