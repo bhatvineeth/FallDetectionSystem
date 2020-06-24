@@ -9,6 +9,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -31,7 +35,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private double[] linear_acceleration = new double[3];
     private static double totalSumVector = 0.0;
     public static final int TIME_CONSTANT = 30;
-    private static double mAngularVelocity=20;
+    private static double mAngularVelocity = 20;
 
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final float[] deltaRotationVector = new float[4];
@@ -50,14 +54,63 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private boolean initState = true;
     public static final float FILTER_COEFFICIENT = 0.98f;
 
-    private float degreeFloat;
-    private float degreeFloat2;
+    private static float degreeFloat;
+    private static float degreeFloat2;
 
-    private Handler mPeriodicEventHandler = new Handler();
-
+    //GPS
+    private static double latitude, longitude;
+    LocationManager locationManager;
+    LocationListener locationListener;
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
+        String locationProvider = LocationManager.NETWORK_PROVIDER;
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Log.d("Latitude ", "" + latitude);
+                Log.d("Longitude ", "" + longitude);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return START_STICKY;
+        }
+        latitude = locationManager.getLastKnownLocation(locationProvider).getLatitude();
+        longitude = locationManager.getLastKnownLocation(locationProvider).getLongitude();
+
+        Log.d("Latitude ", "" + latitude);
+        Log.d("Longitude ", "" + longitude);
+
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -110,38 +163,34 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         int sensorType = event.sensor.getType();
         float currentValue = event.values[0];
         switch (sensorType) {
-            // Event came from the light sensor.
-            case Sensor.TYPE_LIGHT:
-                //mTextSensorLight.setText(getResources().getString(
-                        //R.string.label_light, currentValue));
-                break;
             case Sensor.TYPE_ACCELEROMETER:
                 System.arraycopy(event.values, 0, accel, 0, 3);
                 if (SensorManager.getRotationMatrix(rotationMatrix, null, accel, magnet)) {
                     SensorManager.getOrientation(rotationMatrix, accMagOrientation);
-                }
+               }
 
-                final double alpha = 0.8;
+                //final double alpha = 0.8;
 
                 // Isolate the force of gravity with the low-pass filter.
-                gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-                gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-                gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+                //gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+                //gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+                //gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
 
                 // Remove the gravity contribution with the high-pass filter.
-                linear_acceleration[0] = event.values[0] - gravity[0];
-                linear_acceleration[1] = event.values[1] - gravity[1];
-                linear_acceleration[2] = event.values[2] - gravity[2];
-                Log.d("Activity Monitoring","mTextSensorLinearAccelerationX: " + linear_acceleration[0]);
-                Log.d("Activity Monitoring","mTextSensorLinearAccelerationY: " + linear_acceleration[1]);
-                Log.d("Activity Monitoring","mTextSensorLinearAccelerationZ: " + linear_acceleration[2]);
+                //linear_acceleration[0] = event.values[0] - gravity[0];
+                //linear_acceleration[1] = event.values[1] - gravity[1];
+                //linear_acceleration[2] = event.values[2] - gravity[2];
+                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationX: " + linear_acceleration[0]);
+                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationY: " + linear_acceleration[1]);
+                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationZ: " + linear_acceleration[2]);
                 //mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, linear_acceleration[0]));
                 //mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, linear_acceleration[1]));
                 //mTextSensorLinearAccelerationZ.setText(getResources().getString(R.string.linear_acceleration_z, linear_acceleration[2]));
-                totalSumVector = Math.sqrt((linear_acceleration[0] * linear_acceleration[0]) + (linear_acceleration[1] * linear_acceleration[1])
-                        + (linear_acceleration[2] * linear_acceleration[2]));
+                totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
                 //mTextSensorTotalSumVector.setText(getResources().getString(R.string.totalSumVector, totalSumVector));
-                //Log.d("Activity Monitoring","mTextSensorTotalSumVector: " + totalSumVector);
+                if (totalSumVector > 15) {
+                    Log.d("Activity Monitoring","mTextSensorTotalSumVector: " + totalSumVector);
+                }
                 break;
             case Sensor.TYPE_GYROSCOPE:
 
@@ -318,11 +367,11 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
        /* mRotationX.setText(getResources().getString(R.string.rotation_x, inclinationX));
         mRotationY.setText(getResources().getString(R.string.rotation_y, inclinationY));
         mRotationZ.setText(getResources().getString(R.string.rotation_z, inclinationZ));*/
-        Log.d("Activity Monitoring","inclinationX: " + inclinationX);
-        Log.d("Activity Monitoring","inclinationY: " + inclinationY);
-        Log.d("Activity Monitoring","inclinationZ: " + inclinationZ);
+        //Log.d("Activity Monitoring","inclinationX: " + inclinationX);
+        //Log.d("Activity Monitoring","inclinationY: " + inclinationY);
+        //Log.d("Activity Monitoring","inclinationZ: " + inclinationZ);
         //mAngularVelocity.setText(getResources().getString(R.string.angular_velocity, omegaMagnitude));
-        Log.d("Activity Monitoring","AngularVelocity: " + omegaMagnitude);
+        //Log.d("Activity Monitoring","AngularVelocity: " + omegaMagnitude);
 
         float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
         fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
@@ -341,15 +390,15 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         mRotationY.setText(getResources().getString(R.string.rotation_y, fusedOrientation[1]));
         mRotationZ.setText(getResources().getString(R.string.rotation_z, fusedOrientation[2]));*/
 
-        Log.d("Activity Monitoring","OrientationX: " + fusedOrientation[0]);
-        Log.d("Activity Monitoring","OrientationY: " + fusedOrientation[1]);
-        Log.d("Activity Monitoring","OrientationZ: " + fusedOrientation[2]);
+        //Log.d("Activity Monitoring","OrientationX: " + fusedOrientation[0]);
+        //Log.d("Activity Monitoring","OrientationY: " + fusedOrientation[1]);
+        //Log.d("Activity Monitoring","OrientationZ: " + fusedOrientation[2]);
 
         /*mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, degreeFloat));
         mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, degreeFloat2));*/
 
-        Log.d("Activity Monitoring","Degree1: " + degreeFloat);
-        Log.d("Activity Monitoring","Degree2: " + degreeFloat2);
+        //Log.d("Activity Monitoring","Degree1: " + degreeFloat);
+        //Log.d("Activity Monitoring","Degree2: " + degreeFloat2);
 
 
         gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
@@ -363,8 +412,8 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     @Override
     public boolean stopService(Intent name) {
-        mSensorManager.unregisterListener(this);
-        timer.cancel();
+            mSensorManager.unregisterListener(this);
+            timer.cancel();
         return super.stopService(name);
     }
 
@@ -377,6 +426,21 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         return mAngularVelocity;
     }
 
+    public static float getDegreeFloat() {
+        return degreeFloat;
+    }
+
+    public static float getDegreeFloat2() {
+        return degreeFloat2;
+    }
+
+    public static double getLatitude() {
+        return latitude;
+    }
+
+    public static double getLongitude() {
+        return longitude;
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
