@@ -1,17 +1,21 @@
 package com.ssns.falldetectionsystem;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
 import java.util.Timer;
 
@@ -48,6 +52,8 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     private float degreeFloat;
     private float degreeFloat2;
+
+    private Handler mPeriodicEventHandler = new Handler();
 
 
     @Override
@@ -369,6 +375,21 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public static double getmAngularVelocity(){
         return mAngularVelocity;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //mPeriodicEventHandler.removeCallbacks(doPeriodicTask);
+        Log.d("Stopping Service", "OnDestroy");
+        mSensorManager.unregisterListener(this);
+        //sendCount = 0;
+        //Toast.makeText(this, "Stopped Tracking", Toast.LENGTH_SHORT).show();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }else {
+            locationManager.removeUpdates(locationListener);
+        }
     }
 
 }
