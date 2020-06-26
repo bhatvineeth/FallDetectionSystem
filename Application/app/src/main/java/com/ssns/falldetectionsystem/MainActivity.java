@@ -1,7 +1,9 @@
 package com.ssns.falldetectionsystem;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import static android.util.Half.EPSILON;
 
@@ -47,6 +50,14 @@ public class MainActivity extends AppCompatActivity {
         //mRotationY = (TextView) findViewById(R.id.rotation_y);
         //mRotationZ = (TextView) findViewById(R.id.rotation_z);
         //mAngularVelocity =  (TextView) findViewById(R.id.angular_velocity);
+        //SMS and GPS Permission
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            int PERMISSION_ALL = 1;
+            String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION};
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+//            return;
+        }
 
 
         //TODO: CHECK LOGIN, THEN START SERVICE

@@ -102,8 +102,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return START_STICKY;
+            // for ActivityCompat#requestPermissions for more details
         }
         latitude = locationManager.getLastKnownLocation(locationProvider).getLatitude();
         longitude = locationManager.getLastKnownLocation(locationProvider).getLongitude();
@@ -446,14 +445,14 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         super.onDestroy();
         //mPeriodicEventHandler.removeCallbacks(doPeriodicTask);
         Log.d("Stopping Service", "OnDestroy");
-        mSensorManager.unregisterListener(this);
+        //mSensorManager.unregisterListener(this);
         //sendCount = 0;
         //Toast.makeText(this, "Stopped Tracking", Toast.LENGTH_SHORT).show();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        //if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        }else {
-            locationManager.removeUpdates(locationListener);
-        }
+        //}else {
+           // locationManager.removeUpdates(locationListener);
+       // }
     }
 
 }
