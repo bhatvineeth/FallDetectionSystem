@@ -41,11 +41,12 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private final float[] deltaRotationVector = new float[4];
     private float timestamp;
 
-    private float[] accMagOrientation = new float[3];
+    private static float[] accMagOrientation = new float[3];
     private float[] rotationMatrix = new float[9];
-    private float[] gyroMatrix = new float[9];
+
+    private static float[] gyroMatrix = new float[9];
     private float[] gyro = new float[3];
-    private float[] gyroOrientation = new float[3];
+    private static float[] gyroOrientation = new float[3];
     private float[] fusedOrientation = new float[3];
     private float[] accel = new float[3];
     private float[] magnet = new float[3];
@@ -168,52 +169,13 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                     SensorManager.getOrientation(rotationMatrix, accMagOrientation);
                }
 
-                //final double alpha = 0.8;
-
-                // Isolate the force of gravity with the low-pass filter.
-                //gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-                //gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-                //gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
-
-                // Remove the gravity contribution with the high-pass filter.
-                //linear_acceleration[0] = event.values[0] - gravity[0];
-                //linear_acceleration[1] = event.values[1] - gravity[1];
-                //linear_acceleration[2] = event.values[2] - gravity[2];
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationX: " + linear_acceleration[0]);
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationY: " + linear_acceleration[1]);
-                //Log.d("Activity Monitoring","mTextSensorLinearAccelerationZ: " + linear_acceleration[2]);
-                //mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, linear_acceleration[0]));
-                //mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, linear_acceleration[1]));
-                //mTextSensorLinearAccelerationZ.setText(getResources().getString(R.string.linear_acceleration_z, linear_acceleration[2]));
                 totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
-                //mTextSensorTotalSumVector.setText(getResources().getString(R.string.totalSumVector, totalSumVector));
+
                 if (totalSumVector > 15) {
                     Log.d("Activity Monitoring","mTextSensorTotalSumVector: " + totalSumVector);
                 }
                 break;
             case Sensor.TYPE_GYROSCOPE:
-
-                /*float axisX = event.values[0];
-                float axisY = event.values[1];
-                float axisZ = event.values[2];
-
-                float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
-
-                if (omegaMagnitude > EPSILON) {
-                    axisX /= omegaMagnitude;
-                    axisY /= omegaMagnitude;
-                    axisZ /= omegaMagnitude;
-                }
-
-                int inclinationX = (int) Math.round(Math.toDegrees(Math.acos(axisX)));
-                int inclinationY = (int) Math.round(Math.toDegrees(Math.acos(axisY)));
-                int inclinationZ = (int) Math.round(Math.toDegrees(Math.acos(axisZ)));*/
-
-                //mRotationX.setText(getResources().getString(R.string.rotation_x, inclinationX));
-                //mRotationY.setText(getResources().getString(R.string.rotation_y, inclinationY));
-                //mRotationZ.setText(getResources().getString(R.string.rotation_z, inclinationZ));
-
-                //mAngularVelocity.setText(getResources().getString(R.string.angular_velocity, omegaMagnitude));
                 gyroFunction(event);
                 break;
             default:
@@ -260,7 +222,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         SensorManager.getOrientation(gyroMatrix, gyroOrientation);
     }
 
-    private float[] getRotationMatrixFromOrientation(float[] o) {
+    public static float[] getRotationMatrixFromOrientation(float[] o) {
         float[] xM = new float[9];
         float[] yM = new float[9];
         float[] zM = new float[9];
@@ -311,7 +273,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         return resultMatrix;
     }
 
-    private float[] matrixMultiplication(float[] A, float[] B) {
+    private static float[] matrixMultiplication(float[] A, float[] B) {
         float[] result = new float[9];
 
         result[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
@@ -359,49 +321,6 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         deltaRotationVector[2] = sinThetaOverTwo * normValues[2];
         deltaRotationVector[3] = cosThetaOverTwo;
 
-        int inclinationX = (int) Math.round(Math.toDegrees(Math.acos(normValues[0])));
-        int inclinationY = (int) Math.round(Math.toDegrees(Math.acos(normValues[1])));
-        int inclinationZ = (int) Math.round(Math.toDegrees(Math.acos(normValues[2])));
-
-       /* mRotationX.setText(getResources().getString(R.string.rotation_x, inclinationX));
-        mRotationY.setText(getResources().getString(R.string.rotation_y, inclinationY));
-        mRotationZ.setText(getResources().getString(R.string.rotation_z, inclinationZ));*/
-        //Log.d("Activity Monitoring","inclinationX: " + inclinationX);
-        //Log.d("Activity Monitoring","inclinationY: " + inclinationY);
-        //Log.d("Activity Monitoring","inclinationZ: " + inclinationZ);
-        //mAngularVelocity.setText(getResources().getString(R.string.angular_velocity, omegaMagnitude));
-        //Log.d("Activity Monitoring","AngularVelocity: " + omegaMagnitude);
-
-        float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
-        fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
-//            Log.d("X:", ""+fusedOrientation[0]);
-
-        fusedOrientation[1] = FILTER_COEFFICIENT * gyroOrientation[1] + oneMinusCoeff * accMagOrientation[1];
-//            Log.d("Y:", ""+fusedOrientation[1]);
-
-        fusedOrientation[2] = FILTER_COEFFICIENT * gyroOrientation[2] + oneMinusCoeff * accMagOrientation[2];
-//            Log.d("Z:", ""+fusedOrientation[2]);
-
-        degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
-        degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
-
-        /*mRotationX.setText(getResources().getString(R.string.rotation_x, fusedOrientation[0]));
-        mRotationY.setText(getResources().getString(R.string.rotation_y, fusedOrientation[1]));
-        mRotationZ.setText(getResources().getString(R.string.rotation_z, fusedOrientation[2]));*/
-
-        //Log.d("Activity Monitoring","OrientationX: " + fusedOrientation[0]);
-        //Log.d("Activity Monitoring","OrientationY: " + fusedOrientation[1]);
-        //Log.d("Activity Monitoring","OrientationZ: " + fusedOrientation[2]);
-
-        /*mTextSensorLinearAccelerationX.setText(getResources().getString(R.string.linear_acceleration_x, degreeFloat));
-        mTextSensorLinearAccelerationY.setText(getResources().getString(R.string.linear_acceleration_y, degreeFloat2));*/
-
-        //Log.d("Activity Monitoring","Degree1: " + degreeFloat);
-        //Log.d("Activity Monitoring","Degree2: " + degreeFloat2);
-
-
-        gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
-        System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
     }
 
     @Override
@@ -453,6 +372,30 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         //}else {
            // locationManager.removeUpdates(locationListener);
        // }
+    }
+
+    public static float[] getGyroOrientation() {
+        return gyroOrientation;
+    }
+
+    public static void setGyroOrientation(float[] gyroOrientation) {
+       gyroOrientation = gyroOrientation;
+    }
+
+    public static float[] getAccMagOrientation() {
+        return accMagOrientation;
+    }
+
+    public static void setAccMagOrientation(float[] accMagOrientation) {
+       accMagOrientation = accMagOrientation;
+    }
+
+    public static float[] getGyroMatrix() {
+        return gyroMatrix;
+    }
+
+    public static void setGyroMatrix(float[] gyroMatrix) {
+        gyroMatrix = gyroMatrix;
     }
 
 }
