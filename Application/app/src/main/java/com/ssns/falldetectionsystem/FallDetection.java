@@ -3,6 +3,8 @@ package com.ssns.falldetectionsystem;
 import android.telephony.SmsManager;
 import android.util.Log;
 
+import androidx.appcompat.app.AlertDialog;
+
 import java.util.TimerTask;
 
 public class FallDetection extends TimerTask {
@@ -44,10 +46,12 @@ public class FallDetection extends TimerTask {
                 if (ActivityMonitoring.getTotalSumVector() > mUpperAccFallThreshold) {
                     if (ActivityMonitoring.getOmegaMagnitude() > mAngularVelocityThreshold) {
                         if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
-                            // TODO: User Confirmation Notification
-                            Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
-                            String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
-                            smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                            MainActivity mainActivity = new MainActivity();
+                            if (!mainActivity.alertView()){
+                                Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
+                                String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+                                smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                            }
                         }
                     }
                 }
@@ -71,4 +75,6 @@ public class FallDetection extends TimerTask {
             e.printStackTrace();
         }
     }
+
+
 }

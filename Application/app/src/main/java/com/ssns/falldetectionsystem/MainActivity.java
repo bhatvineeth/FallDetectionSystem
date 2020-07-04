@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -56,7 +57,16 @@ public class MainActivity extends AppCompatActivity {
 
                 stopService(intent);
             }
+
         });
+    }
+
+
+    public  boolean alertView() {
+
+        AlertDialog.Builder alertDialog3 = new AlertDialog.Builder(this);
+        boolean userConfirmation =  Helper.createAlert(alertDialog3, getApplicationContext());
+        return  userConfirmation;
     }
 
 
