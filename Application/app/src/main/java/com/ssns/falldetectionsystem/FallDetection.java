@@ -1,5 +1,6 @@
 package com.ssns.falldetectionsystem;
 
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import java.util.TimerTask;
@@ -18,6 +19,7 @@ public class FallDetection extends TimerTask {
     private static float degreeFloat2;
     private float[] fusedOrientation = new float[3];
 
+    SmsManager smsManager = SmsManager.getDefault();
 
     public void falldetection() throws InterruptedException {
 
@@ -43,6 +45,8 @@ public class FallDetection extends TimerTask {
                     if (Math.abs(ActivityMonitoring.getDegreeFloat()) > mTiltValue ||
                             Math.abs(ActivityMonitoring.getDegreeFloat2()) > mTiltValue) {
                         Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
+                        String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+                        smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
                     }
                 }
         }
