@@ -36,6 +36,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private static double totalSumVector = 0.0;
     public static final int TIME_CONSTANT = 30;
     private static double mAngularVelocity = 20;
+    private static float omegaMagnitude;
 
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final float[] deltaRotationVector = new float[4];
@@ -297,7 +298,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         float[] normValues = new float[3];
 
         // Calculate the angular speed of the sample
-        float omegaMagnitude =
+        omegaMagnitude =
                 (float) Math.sqrt(gyroValues[0] * gyroValues[0] +
                         gyroValues[1] * gyroValues[1] +
                         gyroValues[2] * gyroValues[2]);
@@ -396,6 +397,13 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public static void setGyroMatrix(float[] gyroMatrix) {
         gyroMatrix = gyroMatrix;
+    }
+    public static float getOmegaMagnitude() {
+        return omegaMagnitude;
+    }
+
+    public static void setOmegaMagnitude(float omegaMagnitude) {
+        omegaMagnitude = omegaMagnitude;
     }
 
 }

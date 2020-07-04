@@ -6,10 +6,10 @@ import android.util.Log;
 import java.util.TimerTask;
 
 public class FallDetection extends TimerTask {
-    private double mLowerAccFallThreshold = 6; // 0.6g
-    private double mUpperAccFallThreshold = 5; // 2.55g
-    private double mDelayTime = 30;
-    private double mTiltValue = 2.0;
+    private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
+    private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
+    private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+    private double mTiltValue = 60; // 60 deg
     private double mTilt;
     private double mDelay;
     private boolean mUserConfirmation;
@@ -21,7 +21,7 @@ public class FallDetection extends TimerTask {
 
     SmsManager smsManager = SmsManager.getDefault();
 
-    public void falldetection() throws InterruptedException {
+    public void falldetection() {
 
         float[] gyroOrientation = ActivityMonitoring.getGyroOrientation();
         float[] accMagOrientation = ActivityMonitoring.getAccMagOrientation();
@@ -42,11 +42,13 @@ public class FallDetection extends TimerTask {
 
         if (ActivityMonitoring.getTotalSumVector() < mLowerAccFallThreshold){
                 if (ActivityMonitoring.getTotalSumVector() > mUpperAccFallThreshold) {
-                    if (Math.abs(ActivityMonitoring.getDegreeFloat()) > mTiltValue ||
-                            Math.abs(ActivityMonitoring.getDegreeFloat2()) > mTiltValue) {
-                        Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
-                        String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
-                        smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                    if (ActivityMonitoring.getOmegaMagnitude() > mAngularVelocityThreshold) {
+                        if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
+                            // TODO: User Confirmation Notification
+                            Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
+                            String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+                            smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                        }
                     }
                 }
         }
@@ -63,11 +65,9 @@ public class FallDetection extends TimerTask {
 
     @Override
     public void run() {
-        // TODO: ALGORITHM IMPLEMENTATION
-        //Log.d("FallDetection:  ", "Fall Detection");
         try {
             falldetection();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
