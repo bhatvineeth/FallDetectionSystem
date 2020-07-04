@@ -21,6 +21,7 @@ import static android.util.Half.EPSILON;
 public class MainActivity extends AppCompatActivity {
 
     private Button login, logout;
+    private Context context = getApplicationContext();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    public Context getContext() {
+        return context;
+    }
 
     public void initiate(){
 
