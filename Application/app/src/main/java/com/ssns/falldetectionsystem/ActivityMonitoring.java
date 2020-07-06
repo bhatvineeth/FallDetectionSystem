@@ -1,10 +1,16 @@
 package com.ssns.falldetectionsystem;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,17 +21,28 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.util.Half.EPSILON;
 
 public class ActivityMonitoring extends Service implements SensorEventListener {
+
+    Handler handler = new Handler(Looper.getMainLooper());
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
     private Sensor mSensorGyroscope;
@@ -63,6 +80,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private static double latitude, longitude;
     LocationManager locationManager;
     LocationListener locationListener;
+    int count = 0;
+
+    public static boolean userConfirmation= false;
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
@@ -364,6 +384,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
         //mPeriodicEventHandler.removeCallbacks(doPeriodicTask);
+        stopSelf();
         Log.d("Stopping Service", "OnDestroy");
         //mSensorManager.unregisterListener(this);
         //sendCount = 0;
@@ -405,5 +426,117 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     public static void setOmegaMagnitude(float omegaMagnitude) {
         omegaMagnitude = omegaMagnitude;
     }
+
+    public class FallDetection extends TimerTask {
+        //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
+        //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
+        //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+        //private double mTiltValue = 60; // 60 deg
+        private double mLowerAccFallThreshold = 20; // 0.71g
+        private double mUpperAccFallThreshold = 2; // 1.95g
+        private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
+        private double mTiltValue = 1; // 60 deg
+        private double mTilt;
+        private double mDelay;
+        private boolean mUserConfirmation;
+
+        public static final float FILTER_COEFFICIENT = 0.98f;
+        private  float degreeFloat;
+        private  float degreeFloat2;
+
+
+        SmsManager smsManager = SmsManager.getDefault();
+
+        public void falldetection() {
+
+            float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
+            fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
+//            Log.d("X:", ""+fusedOrientation[0]);
+
+            fusedOrientation[1] = FILTER_COEFFICIENT * gyroOrientation[1] + oneMinusCoeff * accMagOrientation[1];
+//            Log.d("Y:", ""+fusedOrientation[1]);
+
+            fusedOrientation[2] = FILTER_COEFFICIENT * gyroOrientation[2] + oneMinusCoeff * accMagOrientation[2];
+//            Log.d("Z:", ""+fusedOrientation[2]);
+
+            degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
+            degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
+            Log.d("degreeFloat:", ""+degreeFloat);
+            Log.d("degreeFloat2:", ""+degreeFloat2);
+            Log.d("mAngularVelocityThreshold:", ""+ActivityMonitoring.getOmegaMagnitude());
+
+            if (totalSumVector < mLowerAccFallThreshold){
+                if (totalSumVector > mUpperAccFallThreshold) {
+                    if ( omegaMagnitude > mAngularVelocityThreshold) {
+                        if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
+                            if (count == 0){
+                                createChannels();
+                                Notification.Builder nb = getAndroidChannelNotification("title", "By " + "author");
+                                getManager().notify(101, nb.build());
+                                Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
+                                count = 6;
+                            }
+                        }
+                    }
+                }
+            }
+
+            gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
+            System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
+        }
+
+        public void calculate(){
+
+        }
+
+        @Override
+        public void run() {
+            try {
+                falldetection();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public static final String ANDROID_CHANNEL_ID = "com.chikeandroid.tutsplustalerts.ANDROID";
+
+    public Notification.Builder getAndroidChannelNotification(String title, String body) {
+        return new Notification.Builder(getApplicationContext(), ANDROID_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setSmallIcon(android.R.drawable.stat_notify_more)
+                .setAutoCancel(true);
+    }
+
+
+    private NotificationManager mManager;
+    public static final String ANDROID_CHANNEL_NAME = "ANDROID CHANNEL";
+
+    public void createChannels() {
+
+        // create android channel
+        NotificationChannel androidChannel = new NotificationChannel(ANDROID_CHANNEL_ID,
+                ANDROID_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+        // Sets whether notifications posted to this channel should display notification lights
+        androidChannel.enableLights(true);
+        // Sets whether notification posted to this channel should vibrate.
+        androidChannel.enableVibration(true);
+        // Sets the notification light color for notifications posted to this channel
+        androidChannel.setLightColor(Color.GREEN);
+        // Sets whether notifications posted to this channel appear on the lockscreen or not
+        androidChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        getManager().createNotificationChannel(androidChannel);
+
+    }
+
+    NotificationManager getManager() {
+        if (mManager == null) {
+            mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        return mManager;
+    }
+
 
 }
