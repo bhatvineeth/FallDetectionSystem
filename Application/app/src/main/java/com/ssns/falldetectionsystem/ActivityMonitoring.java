@@ -380,6 +380,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     public static double getLongitude() {
         return longitude;
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -469,13 +470,10 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                 if (totalSumVector > mUpperAccFallThreshold) {
                     if ( omegaMagnitude > mAngularVelocityThreshold) {
                         if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
-                            if (count == 0){
-                                createChannels();
-                                Notification.Builder nb = getAndroidChannelNotification("title", "By " + "author");
-                                getManager().notify(101, nb.build());
-                                Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
-                                count = 6;
-                            }
+                            createChannels();
+                            Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
+                            getManager().notify(101, nb.build());
+                            Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
                         }
                     }
                 }
@@ -502,13 +500,17 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     public static final String ANDROID_CHANNEL_ID = "com.chikeandroid.tutsplustalerts.ANDROID";
 
     public Notification.Builder getAndroidChannelNotification(String title, String body) {
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), (int) System.currentTimeMillis(), intent, 0);
+
         return new Notification.Builder(getApplicationContext(), ANDROID_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(android.R.drawable.stat_notify_more)
-                .setAutoCancel(true);
+                .setAutoCancel(true).setUsesChronometer(true).setTimeoutAfter(5000)
+                .addAction(R.drawable.ic_launcher_foreground, "YES", pIntent);
     }
-
 
     private NotificationManager mManager;
     public static final String ANDROID_CHANNEL_NAME = "ANDROID CHANNEL";
