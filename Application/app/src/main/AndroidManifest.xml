@@ -19,6 +19,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".AlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+            <action android:name="ALARM_ACTION" >
+            </action>
+                <action android:name="YES_ACTION" >
+                </action>
+            </intent-filter>
+        </receiver>
         <service android:name=".ActivityMonitoring"
             android:enabled="true"
             android:exported="true"/>

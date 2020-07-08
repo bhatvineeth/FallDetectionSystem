@@ -1,6 +1,7 @@
 package com.ssns.falldetectionsystem;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.SmsManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -75,6 +78,10 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     private static float degreeFloat;
     private static float degreeFloat2;
+
+    public static boolean alarmFlag = false;
+
+    public static long startTimer = 0;
 
     //GPS
     private static double latitude, longitude;
@@ -448,7 +455,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
         SmsManager smsManager = SmsManager.getDefault();
 
-        public void falldetection() {
+        public void falldetection() throws InterruptedException {
 
             float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
             fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
@@ -466,13 +473,36 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
             Log.d("degreeFloat2:", ""+degreeFloat2);
             Log.d("mAngularVelocityThreshold:", ""+ActivityMonitoring.getOmegaMagnitude());
 
+
+            if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000 )){
+                //send sms
+                startTimer = 0;
+                String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+                smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                Log.d("SMS!!!", "SMS Sent");
+            }
+
+            if(isAlarmFlag()){
+                Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+                intent.setAction("ALARM_ACTION");
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 234324243, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.cancel(pendingIntent);
+                setAlarmFlag(false);
+            }
+
             if (totalSumVector < mLowerAccFallThreshold){
                 if (totalSumVector > mUpperAccFallThreshold) {
                     if ( omegaMagnitude > mAngularVelocityThreshold) {
                         if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
+                            if(startTimer == 0){
+                                startTimer = System.currentTimeMillis();
+                            }
                             createChannels();
                             Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
                             getManager().notify(101, nb.build());
+                            Log.d("Notification!!!", "Notification Sent");
+                            startAlert();
                             Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
                         }
                     }
@@ -501,14 +531,15 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public Notification.Builder getAndroidChannelNotification(String title, String body) {
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), (int) System.currentTimeMillis(), intent, 0);
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        intent.setAction("YES_ACTION");
+        PendingIntent pIntent = PendingIntent.getBroadcast(getApplicationContext(), 101, intent, 0);
 
         return new Notification.Builder(getApplicationContext(), ANDROID_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(android.R.drawable.stat_notify_more)
-                .setAutoCancel(true).setUsesChronometer(true).setTimeoutAfter(5000)
+                .setAutoCancel(true).setUsesChronometer(true).setTimeoutAfter(30000)
                 .addAction(R.drawable.ic_launcher_foreground, "YES", pIntent);
     }
 
@@ -541,4 +572,21 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     }
 
 
+    public void startAlert() {
+
+
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        intent.setAction("ALARM_ACTION");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 234324243, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+    }
+
+    public static boolean isAlarmFlag() {
+        return alarmFlag;
+    }
+
+    public static void setAlarmFlag(boolean alarmFlag) {
+        ActivityMonitoring.alarmFlag = alarmFlag;
+    }
 }
