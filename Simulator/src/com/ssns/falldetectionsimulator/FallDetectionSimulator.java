@@ -25,11 +25,12 @@ public class FallDetectionSimulator {
 	private static float[] accel = new float[3]; 
 	private static float[] rotationMatrix = new float[9];
     private static float[] magnet = new float[3];
-    private static double totalSumVector = 0.0;  
+    private static double totalSumVector = 0.0;
+    
 	private float[] fusedOrientation = new float[3];
 	private static float[] gyroOrientation = new float[3];
 	public static long startTimer = 0;
-	
+
     //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
     //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
     //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
@@ -94,7 +95,7 @@ public class FallDetectionSimulator {
             float[] initMatrix = new float[9];
             initMatrix = getRotationMatrixFromOrientation(accMagOrientation);
             float[] test = new float[3];
-            //TODO: getOrientation(initMatrix, test);
+            getOrientation(initMatrix, test);
             gyroMatrix = matrixMultiplication(gyroMatrix, initMatrix);
             initState = false;
         }
@@ -113,13 +114,13 @@ public class FallDetectionSimulator {
 
         // convert rotation vector into rotation matrix
         float[] deltaMatrix = new float[9];
-        //TODO: getRotationMatrixFromVector(deltaMatrix, deltaVector);
+        getRotationMatrixFromVector(deltaMatrix, deltaVector);
 
         // apply the new rotation interval on the gyroscope based rotation matrix
         gyroMatrix = matrixMultiplication(gyroMatrix, deltaMatrix);
 
         // get the gyroscope based orientation from the rotation matrix
-        //TODO: getOrientation(gyroMatrix, gyroOrientation);
+        getOrientation(gyroMatrix, gyroOrientation);
     }
 
     public static float[] getRotationMatrixFromOrientation(float[] o) {
@@ -407,6 +408,82 @@ public class FallDetectionSimulator {
 
         gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
         System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
+    }
+
+    /** Helper function to convert a rotation vector to a rotation matrix.
+     *  Given a rotation vector (presumably from a ROTATION_VECTOR sensor), returns a
+     *  9  or 16 element rotation matrix in the array R.  R must have length 9 or 16.
+     *  If R.length == 9, the following matrix is returned:
+     * <pre>
+     *   /  R[ 0]   R[ 1]   R[ 2]   \
+     *   |  R[ 3]   R[ 4]   R[ 5]   |
+     *   \  R[ 6]   R[ 7]   R[ 8]   /
+     *</pre>
+     * If R.length == 16, the following matrix is returned:
+     * <pre>
+     *   /  R[ 0]   R[ 1]   R[ 2]   0  \
+     *   |  R[ 4]   R[ 5]   R[ 6]   0  |
+     *   |  R[ 8]   R[ 9]   R[10]   0  |
+     *   \  0       0       0       1  /
+     *</pre>
+     *  @param rotationVector the rotation vector to convert
+     *  @param R an array of floats in which to store the rotation matrix
+     */
+    public static void getRotationMatrixFromVector(float[] R, float[] rotationVector) {
+
+        float q0;
+        float q1 = rotationVector[0];
+        float q2 = rotationVector[1];
+        float q3 = rotationVector[2];
+
+        if (rotationVector.length >= 4) {
+            q0 = rotationVector[3];
+        } else {
+            q0 = 1 - q1 * q1 - q2 * q2 - q3 * q3;
+            q0 = (q0 > 0) ? (float) Math.sqrt(q0) : 0;
+        }
+
+        float sq_q1 = 2 * q1 * q1;
+        float sq_q2 = 2 * q2 * q2;
+        float sq_q3 = 2 * q3 * q3;
+        float q1_q2 = 2 * q1 * q2;
+        float q3_q0 = 2 * q3 * q0;
+        float q1_q3 = 2 * q1 * q3;
+        float q2_q0 = 2 * q2 * q0;
+        float q2_q3 = 2 * q2 * q3;
+        float q1_q0 = 2 * q1 * q0;
+
+        if (R.length == 9) {
+            R[0] = 1 - sq_q2 - sq_q3;
+            R[1] = q1_q2 - q3_q0;
+            R[2] = q1_q3 + q2_q0;
+
+            R[3] = q1_q2 + q3_q0;
+            R[4] = 1 - sq_q1 - sq_q3;
+            R[5] = q2_q3 - q1_q0;
+
+            R[6] = q1_q3 - q2_q0;
+            R[7] = q2_q3 + q1_q0;
+            R[8] = 1 - sq_q1 - sq_q2;
+        } else if (R.length == 16) {
+            R[0] = 1 - sq_q2 - sq_q3;
+            R[1] = q1_q2 - q3_q0;
+            R[2] = q1_q3 + q2_q0;
+            R[3] = 0.0f;
+
+            R[4] = q1_q2 + q3_q0;
+            R[5] = 1 - sq_q1 - sq_q3;
+            R[6] = q2_q3 - q1_q0;
+            R[7] = 0.0f;
+
+            R[8] = q1_q3 - q2_q0;
+            R[9] = q2_q3 + q1_q0;
+            R[10] = 1 - sq_q1 - sq_q2;
+            R[11] = 0.0f;
+
+            R[12] = R[13] = R[14] = 0.0f;
+            R[15] = 1.0f;
+        }
     }
 
 }
