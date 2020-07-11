@@ -26,6 +26,11 @@ public class FallDetectionSimulator {
 	private static float[] rotationMatrix = new float[9];
     private static float[] magnet = new float[3];
     private static double totalSumVector = 0.0;
+    
+	private float[] fusedOrientation = new float[3];
+	private static float[] gyroOrientation = new float[3];
+	public static long startTimer = 0;
+	private static double totalSumVector = 0.0; 
 	    
 	static int i = 0;
 	
@@ -339,5 +344,75 @@ public class FallDetectionSimulator {
 
 		return values;
 	}
+	
+	
+	public static float getOmegaMagnitude() {
+        return omegaMagnitude;
+    }
+    
+       public class FallDetection extends TimerTask {
+        //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
+        //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
+        //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+        //private double mTiltValue = 60; // 60 deg
+        private double mLowerAccFallThreshold = 20; // 0.71g
+        private double mUpperAccFallThreshold = 2; // 1.95g
+        private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
+        private double mTiltValue = 1; // 60 deg
+        private double mTilt;
+        private double mDelay;
+        private boolean mUserConfirmation;
+
+        public static final float FILTER_COEFFICIENT = 0.98f;
+        private  float degreeFloat;
+        private  float degreeFloat2;
+
+
+    
+    public void falldetection() throws InterruptedException {
+
+        float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
+        fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
+//        Log.d("X:", ""+fusedOrientation[0]);
+
+        fusedOrientation[1] = FILTER_COEFFICIENT * gyroOrientation[1] + oneMinusCoeff * accMagOrientation[1];
+//        Log.d("Y:", ""+fusedOrientation[1]);
+
+        fusedOrientation[2] = FILTER_COEFFICIENT * gyroOrientation[2] + oneMinusCoeff * accMagOrientation[2];
+//        Log.d("Z:", ""+fusedOrientation[2]);
+
+        degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
+        degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
+        System.out.printf("degreeFloat:", ""+degreeFloat);
+        System.out.printf("degreeFloat2:", ""+degreeFloat2);
+        System.out.printf("mAngularVelocityThreshold:", ""+FallDetectionSimulator.getOmegaMagnitude());
+
+
+        if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
+            //send sms
+            startTimer = 0;
+            //String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+            String textMsg = "Sorry by mistake";
+            //smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+            System.out.printf("SMS!!!", "SMS Sent");
+        }
+        if (totalSumVector < mLowerAccFallThreshold){
+            if (totalSumVector > mUpperAccFallThreshold) {
+                if ( omegaMagnitude > mAngularVelocityThreshold) {
+                    if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
+                        if(startTimer == 0){
+                            startTimer = System.currentTimeMillis();
+                        }
+                            System.out.printf("Notification!!!", "Notification Sent");
+                          //  startAlert();
+                           // System.out.printf("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(FallDetectionSimulator.getLatitude()) + "," + String.valueOf(FallDetectionSimulator.getLongitude()));
+                    }
+                }
+            }
+        }
+
+        gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
+        System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
+    }
 
 }
