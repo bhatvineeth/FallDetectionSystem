@@ -19,6 +19,8 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -87,7 +89,6 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private static double latitude, longitude;
     LocationManager locationManager;
     LocationListener locationListener;
-    int count = 0;
 
     public static boolean userConfirmation= false;
 
@@ -474,23 +475,16 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
             Log.d("mAngularVelocityThreshold:", ""+ActivityMonitoring.getOmegaMagnitude());
 
 
-            if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000 )){
+            if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
                 //send sms
                 startTimer = 0;
-                String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
-                smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
+                //String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
+                String textMsg = "Sorry by mistake";
+                //smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
                 Log.d("SMS!!!", "SMS Sent");
+                Intent stopIntent = new Intent(getApplicationContext(), RingtonePlayingService.class);
+                getApplicationContext().stopService(stopIntent);
             }
-
-            if(isAlarmFlag()){
-                Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-                intent.setAction("ALARM_ACTION");
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 234324243, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                alarmManager.cancel(pendingIntent);
-                setAlarmFlag(false);
-            }
-
             if (totalSumVector < mLowerAccFallThreshold){
                 if (totalSumVector > mUpperAccFallThreshold) {
                     if ( omegaMagnitude > mAngularVelocityThreshold) {
@@ -498,12 +492,12 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                             if(startTimer == 0){
                                 startTimer = System.currentTimeMillis();
                             }
-                            createChannels();
-                            Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
-                            getManager().notify(101, nb.build());
-                            Log.d("Notification!!!", "Notification Sent");
-                            startAlert();
-                            Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
+                                createChannels();
+                                Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
+                                getManager().notify(101, nb.build());
+                                Log.d("Notification!!!", "Notification Sent");
+                                startAlert();
+                                Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
                         }
                     }
                 }

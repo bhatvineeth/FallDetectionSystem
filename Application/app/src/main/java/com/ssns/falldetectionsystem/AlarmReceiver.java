@@ -16,9 +16,12 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction()=="ALARM_ACTION") {
             Log.d("ALARM!!!", "ALARM");
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            Ringtone r = RingtoneManager.getRingtone(context, notification);
-            r.play();
+            Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            Intent stopIntent = new Intent(context, RingtonePlayingService.class);
+            context.stopService(stopIntent);
+            Intent startIntent = new Intent(context, RingtonePlayingService.class);
+            startIntent.putExtra("ringtone-uri", ringtoneUri);
+            context.startService(startIntent);
             Log.d("Alarm!!!", "Alarm triggered");
         }
         if(intent.getAction()=="YES_ACTION") {
@@ -27,6 +30,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             notificationManager.cancel(101);
             ActivityMonitoring.startTimer = 0;
             ActivityMonitoring.setAlarmFlag(true);
+            Intent stopIntent = new Intent(context, RingtonePlayingService.class);
+            context.stopService(stopIntent);
         }
 
 
