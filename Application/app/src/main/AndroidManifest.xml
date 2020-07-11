@@ -33,6 +33,9 @@
         <service android:name=".ActivityMonitoring"
             android:enabled="true"
             android:exported="true"/>
+        <service android:name=".RingtonePlayingService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>
