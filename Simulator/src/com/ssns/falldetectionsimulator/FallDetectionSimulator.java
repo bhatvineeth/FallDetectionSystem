@@ -25,12 +25,29 @@ public class FallDetectionSimulator {
 	private static float[] accel = new float[3]; 
 	private static float[] rotationMatrix = new float[9];
     private static float[] magnet = new float[3];
-    private static double totalSumVector = 0.0;
-    
+    private static double totalSumVector = 0.0;  
 	private float[] fusedOrientation = new float[3];
 	private static float[] gyroOrientation = new float[3];
 	public static long startTimer = 0;
-	private static double totalSumVector = 0.0; 
+	
+    //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
+    //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
+    //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+    //private double mTiltValue = 60; // 60 deg
+    private double mLowerAccFallThreshold = 20; // 0.71g
+    private double mUpperAccFallThreshold = 2; // 1.95g
+    private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
+    private double mTiltValue = 1; // 60 deg
+    private double mTilt;
+    private double mDelay;
+    private boolean mUserConfirmation;
+
+    public static final float FILTER_COEFFICIENT = 0.98f;
+    private  float degreeFloat;
+    private  float degreeFloat2;
+
+
+
 	    
 	static int i = 0;
 	
@@ -346,30 +363,7 @@ public class FallDetectionSimulator {
 	}
 	
 	
-	public static float getOmegaMagnitude() {
-        return omegaMagnitude;
-    }
-    
-       public class FallDetection extends TimerTask {
-        //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
-        //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
-        //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
-        //private double mTiltValue = 60; // 60 deg
-        private double mLowerAccFallThreshold = 20; // 0.71g
-        private double mUpperAccFallThreshold = 2; // 1.95g
-        private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
-        private double mTiltValue = 1; // 60 deg
-        private double mTilt;
-        private double mDelay;
-        private boolean mUserConfirmation;
-
-        public static final float FILTER_COEFFICIENT = 0.98f;
-        private  float degreeFloat;
-        private  float degreeFloat2;
-
-
-    
-    public void falldetection() throws InterruptedException {
+    public void falldetection() {
 
         float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
         fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
@@ -385,7 +379,7 @@ public class FallDetectionSimulator {
         degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
         System.out.printf("degreeFloat:", ""+degreeFloat);
         System.out.printf("degreeFloat2:", ""+degreeFloat2);
-        System.out.printf("mAngularVelocityThreshold:", ""+FallDetectionSimulator.getOmegaMagnitude());
+        System.out.printf("mAngularVelocityThreshold:", ""+omegaMagnitude);
 
 
         if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
