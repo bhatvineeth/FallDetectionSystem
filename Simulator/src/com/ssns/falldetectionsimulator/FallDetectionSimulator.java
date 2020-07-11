@@ -46,7 +46,7 @@ public class FallDetectionSimulator {
             float[] initMatrix = new float[9];
             initMatrix = getRotationMatrixFromOrientation(accMagOrientation);
             float[] test = new float[3];
-            //TODO: SensorManager.getOrientation(initMatrix, test);
+            //TODO: getOrientation(initMatrix, test);
             gyroMatrix = matrixMultiplication(gyroMatrix, initMatrix);
             initState = false;
         }
@@ -65,13 +65,13 @@ public class FallDetectionSimulator {
 
         // convert rotation vector into rotation matrix
         float[] deltaMatrix = new float[9];
-        //TODO: SensorManager.getRotationMatrixFromVector(deltaMatrix, deltaVector);
+        //TODO: getRotationMatrixFromVector(deltaMatrix, deltaVector);
 
         // apply the new rotation interval on the gyroscope based rotation matrix
         gyroMatrix = matrixMultiplication(gyroMatrix, deltaMatrix);
 
         // get the gyroscope based orientation from the rotation matrix
-        //TODO: SensorManager.getOrientation(gyroMatrix, gyroOrientation);
+        //TODO: getOrientation(gyroMatrix, gyroOrientation);
     }
 	
     public static float[] getRotationMatrixFromOrientation(float[] o) {
