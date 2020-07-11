@@ -26,3 +26,6 @@ Application/.idea/vcs.xml
 Application/.idea/.name
 Application/.idea/jarRepositories.xml
 Application/.idea/runConfigurations.xml
+.settings/org.eclipse.jdt.core.prefs
+.classpath
+.project
