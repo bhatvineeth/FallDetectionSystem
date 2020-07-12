@@ -18,7 +18,7 @@ public class FallDetectionSimulator {
 	private static boolean initState = true;
 	private static float[] accMagOrientation = new float[3];
 	private static float[] gyroMatrix = new float[9];
-	private static float timestamp;
+
 	private static final float NS2S = 1.0f / 1000000000.0f;
 
 	static float accelerometerData[] = new float[3];
@@ -41,45 +41,40 @@ public class FallDetectionSimulator {
     public static final float FILTER_COEFFICIENT = 0.98f;
 	static private  float degreeFloat;
 	static private  float degreeFloat2;
-
+	private static long currentTime = 2318482693000L;
+	private static long prevtimestamp;
+	    
 	static int i = 0;
 	
 	public static void main(String[] args) {
 		readDataSets();
-		Timer timer = new Timer("Timer");
-		TimerTask task = new TimerTask() {
-			public void run() {
-				if (i >= accDataset.length) {
-					timer.cancel();
-					timer.purge();
 
-				} else {
-					accelerometerData[0] = accDataset[i][0];
-					accelerometerData[1] = accDataset[i][1];
-					accelerometerData[2] = accDataset[i][2];
+		String nanoTime;
+		while(true) {
+			nanoTime = String.valueOf(currentTime);
+			if(accMap.containsKey(nanoTime)){
+				accelerometerData[0] =  accMap.get(nanoTime)[0];
+				accelerometerData[1] =  accMap.get(nanoTime)[1];
+				accelerometerData[2] =  accMap.get(nanoTime)[2];
 
-					gyroscopeData[0] = gyroDataset[i][0];
-					gyroscopeData[1] = gyroDataset[i][1];
-					gyroscopeData[2] = gyroDataset[i][2];
-
-					System.arraycopy(accelerometerData, 0, accel, 0, 3);
-					if (getRotationMatrix(rotationMatrix, null, accel, magnet)) {
-						getOrientation(rotationMatrix, accMagOrientation);
-					}
-					totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
-
-					System.out.println("mTextSensorTotalSumVector: " + totalSumVector);
-
-					gyroFunction(gyroscopeData);
-					falldetection();
-					i++;
+				System.arraycopy(accelerometerData, 0, accel, 0, 3);
+				if (getRotationMatrix(rotationMatrix, null, accel, magnet)) {
+					getOrientation(rotationMatrix, accMagOrientation);
 				}
-			}
-	    };
+				totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
 
-	    
-	    long delay = 0;
-	    timer.schedule(task, delay, 10);
+					System.out.println("TotalSumVector: " + totalSumVector);
+
+			}
+			if(gyroMap.containsKey(nanoTime)){
+				gyroscopeData[0] =  gyroMap.get(nanoTime)[0];
+				gyroscopeData[1] =  gyroMap.get(nanoTime)[1];
+				gyroscopeData[2] =  gyroMap.get(nanoTime)[2];
+				gyroFunction(gyroscopeData);
+			}
+			currentTime = currentTime + 1000;
+			falldetection();
+		}
 
 	}
 	
@@ -102,14 +97,14 @@ public class FallDetectionSimulator {
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
         float[] deltaVector = new float[4];
-        if (timestamp != 0) {
+        if (prevtimestamp != 2318482693000L) {
             final float dT = 10000000 * NS2S;
             System.arraycopy(event, 0, gyro, 0, 3);
             getRotationVectorFromGyro(gyro, deltaVector, dT / 2.0f);
         }
 
         // measurement done, save current time for next interval
-        timestamp = timestamp + 10000000 ;
+		prevtimestamp = currentTime;
 
         // convert rotation vector into rotation matrix
         float[] deltaMatrix = new float[9];
@@ -228,10 +223,11 @@ public class FallDetectionSimulator {
 
 	public static void readDataSets() {
 		try {
-			File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");   
+			//File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
+			File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
 			BufferedReader brAcc=new BufferedReader(new FileReader(fileAcc));
 			
-			File fileGyro = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_gyro_1_1.txt");   
+			File fileGyro = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_gyro_1_1.txt");
 			BufferedReader brGyro =new BufferedReader(new FileReader(fileGyro));
 			
 			
@@ -248,7 +244,7 @@ public class FallDetectionSimulator {
 					accDataset[i][1] = (float) Double.parseDouble(line.split(",")[2]);
 					accDataset[i][2] = (float) Double.parseDouble(line.split(",")[3]);
 					accMap.put(line.split(",")[0], accDataset[i]);
-					
+
 					gyroDataset[i][0] = (float) Double.parseDouble(line2.split(",")[1]);
 					gyroDataset[i][1] = (float) Double.parseDouble(line2.split(",")[2]);
 					gyroDataset[i][2] = (float) Double.parseDouble(line2.split(",")[3]);

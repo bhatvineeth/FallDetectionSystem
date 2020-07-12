@@ -143,6 +143,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         String sensor_error = getResources().getString(R.string.error_no_sensor);
 
 
@@ -446,7 +447,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
         //private double mTiltValue = 60; // 60 deg
         private double mLowerAccFallThreshold = 1; // 0.71g
-        private double mUpperAccFallThreshold = 15; // 1.95g
+        private double mUpperAccFallThreshold = 10; // 1.95g
         private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
         private double mTiltValue = 1; // 60 deg
         private double mTilt;
