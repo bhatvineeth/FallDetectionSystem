@@ -3,14 +3,15 @@ package com.ssns.falldetectionsimulator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class FallDetectionSimulator {
 
-	static float accDataset[][] = new float[1000][4];
-	static float gyroDataset[][] = new float[1000][4];
+	static Map<String, Float[]> accMap = new HashMap<String, Float[]>();
+	static Map<String, Float[]> gyroMap = new HashMap<String, Float[]>();
+
+	static Float accDataset[][] = new Float[1000][4];
+	static Float gyroDataset[][] = new Float[1000][4];
 	private static float[] gyro = new float[3];
 	private static float omegaMagnitude;
 	public static final float EPSILON = 0.000000001f;
@@ -27,57 +28,55 @@ public class FallDetectionSimulator {
     private static float[] magnet = new float[3];
     private static double totalSumVector = 0.0;
     
-	private float[] fusedOrientation = new float[3];
+	private static float[] fusedOrientation = new float[3];
 	private static float[] gyroOrientation = new float[3];
 	public static long startTimer = 0;
 
-    //private double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
-    //private double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
-    //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
-    //private double mTiltValue = 60; // 60 deg
-    private double mLowerAccFallThreshold = 20; // 0.71g
-    private double mUpperAccFallThreshold = 2; // 1.95g
-    private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
-    private double mTiltValue = 1; // 60 deg
-    private double mTilt;
-    private double mDelay;
-    private boolean mUserConfirmation;
+    private static double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
+    private static double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
+    private static double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+    private static double mTiltValue = 60; // 60 deg
+
 
     public static final float FILTER_COEFFICIENT = 0.98f;
-    private  float degreeFloat;
-    private  float degreeFloat2;
+	static private  float degreeFloat;
+	static private  float degreeFloat2;
 
-
-
-	    
 	static int i = 0;
 	
 	public static void main(String[] args) {
 		readDataSets();
+		Timer timer = new Timer("Timer");
 		TimerTask task = new TimerTask() {
 			public void run() {
+				if (i >= accDataset.length) {
+					timer.cancel();
+					timer.purge();
 
-				accelerometerData[0] = accDataset[i][0];
-				accelerometerData[1] = accDataset[i][1];
-				accelerometerData[2] = accDataset[i][2];
+				} else {
+					accelerometerData[0] = accDataset[i][0];
+					accelerometerData[1] = accDataset[i][1];
+					accelerometerData[2] = accDataset[i][2];
 
-				gyroscopeData[0] = gyroDataset[i][0];
-				gyroscopeData[1] = gyroDataset[i][1];
-				gyroscopeData[2] = gyroDataset[i][2];
+					gyroscopeData[0] = gyroDataset[i][0];
+					gyroscopeData[1] = gyroDataset[i][1];
+					gyroscopeData[2] = gyroDataset[i][2];
 
-				System.arraycopy(accelerometerData, 0, accel, 0, 3);
-				if (getRotationMatrix(rotationMatrix, null, accel, magnet)) {
-					getOrientation(rotationMatrix, accMagOrientation);
+					System.arraycopy(accelerometerData, 0, accel, 0, 3);
+					if (getRotationMatrix(rotationMatrix, null, accel, magnet)) {
+						getOrientation(rotationMatrix, accMagOrientation);
+					}
+					totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
+
+					System.out.println("mTextSensorTotalSumVector: " + totalSumVector);
+
+					gyroFunction(gyroscopeData);
+					falldetection();
+					i++;
 				}
-				totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
-				if (totalSumVector > 15) {
-					//Log.d("Activity Monitoring","mTextSensorTotalSumVector: " + totalSumVector);
-				}
-				gyroFunction(gyroscopeData);
-
-				}
+			}
 	    };
-	    Timer timer = new Timer("Timer");
+
 	    
 	    long delay = 0;
 	    timer.schedule(task, delay, 10);
@@ -110,7 +109,7 @@ public class FallDetectionSimulator {
         }
 
         // measurement done, save current time for next interval
-        //timestamp = event.timestamp;
+        timestamp = timestamp + 10000000 ;
 
         // convert rotation vector into rotation matrix
         float[] deltaMatrix = new float[9];
@@ -248,12 +247,15 @@ public class FallDetectionSimulator {
 					accDataset[i][0] = (float) Double.parseDouble(line.split(",")[1]);
 					accDataset[i][1] = (float) Double.parseDouble(line.split(",")[2]);
 					accDataset[i][2] = (float) Double.parseDouble(line.split(",")[3]);
+					accMap.put(line.split(",")[0], accDataset[i]);
 					
 					gyroDataset[i][0] = (float) Double.parseDouble(line2.split(",")[1]);
 					gyroDataset[i][1] = (float) Double.parseDouble(line2.split(",")[2]);
 					gyroDataset[i][2] = (float) Double.parseDouble(line2.split(",")[3]);
+					gyroMap.put(line2.split(",")[0], gyroDataset[i]);
 					//System.out.println(gyro[i][0]);
 					//System.out.println(acc[i][0]);
+					i++;
 				}
 				line = brAcc.readLine();
 				line2 = brGyro.readLine();
@@ -364,7 +366,7 @@ public class FallDetectionSimulator {
 	}
 	
 	
-    public void falldetection() {
+    public static void falldetection() {
 
         float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
         fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
@@ -378,9 +380,9 @@ public class FallDetectionSimulator {
 
         degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
         degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
-        System.out.printf("degreeFloat:", ""+degreeFloat);
-        System.out.printf("degreeFloat2:", ""+degreeFloat2);
-        System.out.printf("mAngularVelocityThreshold:", ""+omegaMagnitude);
+        System.out.println("degreeFloat:"+degreeFloat);
+        System.out.println("degreeFloat2:"+degreeFloat2);
+        System.out.println("mAngularVelocityThreshold:"+omegaMagnitude);
 
 
         if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
@@ -389,9 +391,9 @@ public class FallDetectionSimulator {
             //String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
             String textMsg = "Sorry by mistake";
             //smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
-            System.out.printf("SMS!!!", "SMS Sent");
+            System.out.println("SMS Sent");
         }
-        if (totalSumVector < mLowerAccFallThreshold){
+        //if (totalSumVector < mLowerAccFallThreshold){
             if (totalSumVector > mUpperAccFallThreshold) {
                 if ( omegaMagnitude > mAngularVelocityThreshold) {
                     if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
@@ -404,7 +406,7 @@ public class FallDetectionSimulator {
                     }
                 }
             }
-        }
+        //}
 
         gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
         System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
