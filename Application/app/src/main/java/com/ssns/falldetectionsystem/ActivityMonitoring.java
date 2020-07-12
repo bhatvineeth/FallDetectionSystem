@@ -166,10 +166,10 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public void initListeners() {
         if (mSensorAccelerometer != null) {
-            mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorGyroscope != null) {
-            mSensorManager.registerListener(this, mSensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mSensorGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorMagnetic != null) {
             mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
@@ -206,6 +206,10 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 gyroFunction(event);
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                // copy new magnetometer data into magnet array
+                System.arraycopy(event.values, 0, magnet, 0, 3);
                 break;
             default:
                 // do nothing
@@ -485,7 +489,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                 Intent stopIntent = new Intent(getApplicationContext(), RingtonePlayingService.class);
                 getApplicationContext().stopService(stopIntent);
             }
-            if (totalSumVector < mLowerAccFallThreshold){
+            //if (totalSumVector < mLowerAccFallThreshold){
                 if (totalSumVector > mUpperAccFallThreshold) {
                     if ( omegaMagnitude > mAngularVelocityThreshold) {
                         if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
@@ -501,7 +505,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                         }
                     }
                 }
-            }
+            //}
 
             gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
             System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
