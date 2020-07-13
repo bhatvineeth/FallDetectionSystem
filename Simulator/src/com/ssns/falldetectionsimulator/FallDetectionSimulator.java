@@ -1,8 +1,6 @@
 package com.ssns.falldetectionsimulator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.util.*;
 
 public class FallDetectionSimulator {
@@ -19,7 +17,7 @@ public class FallDetectionSimulator {
 	private static float[] accMagOrientation = new float[3];
 	private static float[] gyroMatrix = new float[9];
 
-	private static final float NS2S = 1.0f / 1000000000.0f;
+	private static final float NS2S = 1.0f / 1000.0f;
 
 	static float accelerometerData[] = new float[3];
 	static float gyroscopeData[] = new float[3];
@@ -41,17 +39,38 @@ public class FallDetectionSimulator {
     public static final float FILTER_COEFFICIENT = 0.98f;
 	static private  float degreeFloat;
 	static private  float degreeFloat2;
-	private static long currentTime = 2318482693000L;
+	private static long currentTime = 2318294309000L;
 	private static long prevtimestamp;
+	static FileWriter myWriter;
+
+	static {
+		try {
+			myWriter = new FileWriter("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/test.txt");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	//myWriter.close();
 	    
 	static int i = 0;
-	
-	public static void main(String[] args) {
+
+	public FallDetectionSimulator() throws IOException {
+	}
+
+	public static void main(String[] args) throws IOException {
 		readDataSets();
 
 		String nanoTime;
 		while(true) {
+			// 2328285952000 2328284010000
 			nanoTime = String.valueOf(currentTime);
+			if (currentTime >= 2328285952000L) {
+				System.out.println("Completed");
+				myWriter.write("Completed"+ "\n");
+				myWriter.close();
+				break;
+			}
 			if(accMap.containsKey(nanoTime)){
 				accelerometerData[0] =  accMap.get(nanoTime)[0];
 				accelerometerData[1] =  accMap.get(nanoTime)[1];
@@ -63,7 +82,8 @@ public class FallDetectionSimulator {
 				}
 				totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
 
-					System.out.println("TotalSumVector: " + totalSumVector);
+				//System.out.println("TotalSumVector: " + totalSumVector);
+				myWriter.write("TotalSumVector: " + totalSumVector + "\n");
 
 			}
 			if(gyroMap.containsKey(nanoTime)){
@@ -74,6 +94,7 @@ public class FallDetectionSimulator {
 			}
 			currentTime = currentTime + 1000;
 			falldetection();
+
 		}
 
 	}
@@ -97,8 +118,8 @@ public class FallDetectionSimulator {
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
         float[] deltaVector = new float[4];
-        if (prevtimestamp != 2318482693000L) {
-            final float dT = 10000000 * NS2S;
+        if (currentTime != 2318294309000L) {
+            final float dT = (currentTime - prevtimestamp) * NS2S;
             System.arraycopy(event, 0, gyro, 0, 3);
             getRotationVectorFromGyro(gyro, deltaVector, dT / 2.0f);
         }
@@ -223,11 +244,11 @@ public class FallDetectionSimulator {
 
 	public static void readDataSets() {
 		try {
-			//File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
-			File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
+			File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
+			//File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
 			BufferedReader brAcc=new BufferedReader(new FileReader(fileAcc));
 			
-			File fileGyro = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_gyro_1_1.txt");
+			File fileGyro = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_gyro_1_1.txt");
 			BufferedReader brGyro =new BufferedReader(new FileReader(fileGyro));
 			
 			
@@ -362,7 +383,7 @@ public class FallDetectionSimulator {
 	}
 	
 	
-    public static void falldetection() {
+    public static void falldetection() throws IOException {
 
         float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
         fusedOrientation[0] = FILTER_COEFFICIENT * gyroOrientation[0] + oneMinusCoeff * accMagOrientation[0];
@@ -374,11 +395,16 @@ public class FallDetectionSimulator {
         fusedOrientation[2] = FILTER_COEFFICIENT * gyroOrientation[2] + oneMinusCoeff * accMagOrientation[2];
 //        Log.d("Z:", ""+fusedOrientation[2]);
 
-        degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
-        degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
-        System.out.println("degreeFloat:"+degreeFloat);
-        System.out.println("degreeFloat2:"+degreeFloat2);
-        System.out.println("mAngularVelocityThreshold:"+omegaMagnitude);
+		degreeFloat = (float) (fusedOrientation[1] * 180 / Math.PI);
+		degreeFloat2 = (float) (fusedOrientation[2] * 180 / Math.PI);
+		//System.out.println("degreeFloat:"+degreeFloat);
+        //System.out.println("degreeFloat2:"+degreeFloat2);
+        //System.out.println("mAngularVelocityThreshold:"+omegaMagnitude);
+		myWriter.write("degreeFloat:"+degreeFloat+ "\n");
+
+
+		//myWriter.write("degreeFloat2:"+degreeFloat2+ "\n");
+		myWriter.write("mAngularVelocityThreshold:"+omegaMagnitude+ "\n");
 
 
         if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
@@ -388,15 +414,22 @@ public class FallDetectionSimulator {
             String textMsg = "Sorry by mistake";
             //smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
             System.out.println("SMS Sent");
+			myWriter.write("SMS Sent"+ "\n");
         }
+
         //if (totalSumVector < mLowerAccFallThreshold){
             if (totalSumVector > mUpperAccFallThreshold) {
                 if ( omegaMagnitude > mAngularVelocityThreshold) {
-                    if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
+                    if (Math.abs(degreeFloat) > mTiltValue || Math.abs(degreeFloat2) > mTiltValue) {
                         if(startTimer == 0){
                             startTimer = System.currentTimeMillis();
                         }
-                            System.out.printf("Notification!!!", "Notification Sent");
+                            System.out.println("Notification!!!");
+							System.out.println("degreeFloat:"+degreeFloat);
+							System.out.println("degreeFloat2:"+degreeFloat2);
+							System.out.println("omegaMagnitude : " + mAngularVelocityThreshold);
+							System.out.println("SMV : " + totalSumVector);
+							myWriter.write("FALL !!!!! DANGER"+ "\n");
                           //  startAlert();
                            // System.out.printf("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(FallDetectionSimulator.getLatitude()) + "," + String.valueOf(FallDetectionSimulator.getLongitude()));
                     }
