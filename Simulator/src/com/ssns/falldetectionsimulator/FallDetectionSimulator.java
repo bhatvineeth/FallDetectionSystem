@@ -2,6 +2,9 @@ package com.ssns.falldetectionsimulator;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FallDetectionSimulator {
 
@@ -39,17 +42,17 @@ public class FallDetectionSimulator {
     public static final float FILTER_COEFFICIENT = 0.98f;
 	static private  float degreeFloat;
 	static private  float degreeFloat2;
-	private static long currentTime = 2318294309000L;
+	private static long currentTime = 2137355177000L;
 	private static long prevtimestamp;
 	static FileWriter myWriter;
 
-	static {
-		try {
-			myWriter = new FileWriter("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/test.txt");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	static File fileAcc = null;
+	static File fileGyro = null;
+
+	static Pattern p = Pattern.compile("/.*(acc_[0-9]+_[1].txt)$");
+	static Pattern q = Pattern.compile("/.*(gyro_[0-9]+_[1].txt)$");
+	static Matcher m;
+	static String logPath;
 
 	//myWriter.close();
 	    
@@ -59,13 +62,17 @@ public class FallDetectionSimulator {
 	}
 
 	public static void main(String[] args) throws IOException {
-		readDataSets();
+		File file = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0");
+		fetchFiles(file, f -> System.out.printf(""));
+	}
 
+
+	public static void testAlgorithm() throws IOException {
 		String nanoTime;
 		while(true) {
 			// 2328285952000 2328284010000
 			nanoTime = String.valueOf(currentTime);
-			if (currentTime >= 2328285952000L) {
+			if (currentTime >= 2167348816000L) {
 				System.out.println("Completed");
 				myWriter.write("Completed"+ "\n");
 				myWriter.close();
@@ -96,7 +103,34 @@ public class FallDetectionSimulator {
 			falldetection();
 
 		}
+	}
 
+	public static void fetchFiles(File dir, Consumer<File> fileConsumer) throws IOException {
+		if (dir.isDirectory()) {
+			for (File file1 : dir.listFiles()) {
+				fetchFiles(file1, fileConsumer);
+			}
+		} else {
+			m = p.matcher(dir.getAbsolutePath());
+			if(m.matches()){
+				fileAcc = new File(dir.getAbsolutePath());
+				System.out.println(fileAcc.getAbsolutePath());
+			}
+			m = q.matcher(dir.getAbsolutePath());
+			if(m.matches()){
+				fileGyro = new File(dir.getAbsolutePath());
+				System.out.println(fileGyro.getAbsolutePath());
+			}
+			if(fileAcc != null && fileGyro != null){
+				logPath = fileAcc.getAbsolutePath().substring(0 , fileAcc.getAbsolutePath().lastIndexOf("/"));
+				readDataSets();
+				testAlgorithm();
+				fileAcc = null;
+				fileGyro = null;
+
+			}
+			fileConsumer.accept(dir);
+		}
 	}
 	
 
@@ -118,7 +152,7 @@ public class FallDetectionSimulator {
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
         float[] deltaVector = new float[4];
-        if (currentTime != 2318294309000L) {
+        if (currentTime != 2137355177000L) {
             final float dT = (currentTime - prevtimestamp) * NS2S;
             System.arraycopy(event, 0, gyro, 0, 3);
             getRotationVectorFromGyro(gyro, deltaVector, dT / 2.0f);
@@ -244,12 +278,14 @@ public class FallDetectionSimulator {
 
 	public static void readDataSets() {
 		try {
-			File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
-			//File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
+			//File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
+			//File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub2/ADL/JOG/JOG_acc_2_1.txt");
 			BufferedReader brAcc=new BufferedReader(new FileReader(fileAcc));
 			
-			File fileGyro = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_gyro_1_1.txt");
+			//File fileGyro = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub2/ADL/JOG/JOG_gyro_2_1.txt");
 			BufferedReader brGyro =new BufferedReader(new FileReader(fileGyro));
+
+			myWriter = new FileWriter(logPath+"/result.txt");
 			
 			
 			String line = brAcc.readLine();
@@ -430,6 +466,7 @@ public class FallDetectionSimulator {
 							System.out.println("omegaMagnitude : " + mAngularVelocityThreshold);
 							System.out.println("SMV : " + totalSumVector);
 							myWriter.write("FALL !!!!! DANGER"+ "\n");
+
                           //  startAlert();
                            // System.out.printf("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(FallDetectionSimulator.getLatitude()) + "," + String.valueOf(FallDetectionSimulator.getLongitude()));
                     }
