@@ -42,7 +42,7 @@ public class FallDetectionSimulator {
     public static final float FILTER_COEFFICIENT = 0.98f;
 	static private  float degreeFloat;
 	static private  float degreeFloat2;
-	private static long currentTime = 2137355177000L;
+	private static long currentTime;
 	private static long prevtimestamp;
 	static FileWriter myWriter;
 
@@ -55,6 +55,8 @@ public class FallDetectionSimulator {
 	static String logPath;
 
 	//myWriter.close();
+	static long min = 0;
+	static long max = 0;
 	    
 	static int i = 0;
 
@@ -72,7 +74,7 @@ public class FallDetectionSimulator {
 		while(true) {
 			// 2328285952000 2328284010000
 			nanoTime = String.valueOf(currentTime);
-			if (currentTime >= 2167348816000L) {
+			if (currentTime >= max) {
 				System.out.println("Completed");
 				myWriter.write("Completed"+ "\n");
 				myWriter.close();
@@ -152,7 +154,7 @@ public class FallDetectionSimulator {
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
         float[] deltaVector = new float[4];
-        if (currentTime != 2137355177000L) {
+        if (currentTime != min) {
             final float dT = (currentTime - prevtimestamp) * NS2S;
             System.arraycopy(event, 0, gyro, 0, 3);
             getRotationVectorFromGyro(gyro, deltaVector, dT / 2.0f);
@@ -278,6 +280,8 @@ public class FallDetectionSimulator {
 
 	public static void readDataSets() {
 		try {
+			min =0;
+			max =0;
 			//File fileAcc = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/sub1/FALLS/BSC/BSC_acc_1_1.txt");
 			//File fileAcc = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub2/ADL/JOG/JOG_acc_2_1.txt");
 			BufferedReader brAcc=new BufferedReader(new FileReader(fileAcc));
@@ -297,6 +301,10 @@ public class FallDetectionSimulator {
 					startRead = true;
 				}
 				if (startRead && !line.contentEquals("@DATA")) {
+					if(min == 0){
+						min = (long) Double.parseDouble(line.split(",")[0]);
+					}
+					max = (long) Double.parseDouble(line.split(",")[0]);
 					accDataset[i][0] = (float) Double.parseDouble(line.split(",")[1]);
 					accDataset[i][1] = (float) Double.parseDouble(line.split(",")[2]);
 					accDataset[i][2] = (float) Double.parseDouble(line.split(",")[3]);
@@ -313,6 +321,7 @@ public class FallDetectionSimulator {
 				line = brAcc.readLine();
 				line2 = brGyro.readLine();
 			}
+			currentTime = min;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
