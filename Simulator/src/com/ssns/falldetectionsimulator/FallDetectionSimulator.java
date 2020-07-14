@@ -49,8 +49,8 @@ public class FallDetectionSimulator {
 	static File fileAcc = null;
 	static File fileGyro = null;
 
-	static Pattern p = Pattern.compile("/.*(acc_[0-9]+_[1].txt)$");
-	static Pattern q = Pattern.compile("/.*(gyro_[0-9]+_[1].txt)$");
+	static Pattern p = Pattern.compile(".*(acc_[0-9]+_[1].txt)$");
+	static Pattern q = Pattern.compile(".*(gyro_[0-9]+_[1].txt)$");
 	static Matcher m;
 	static String logPath;
 	static FileWriter finalResultWriter;
