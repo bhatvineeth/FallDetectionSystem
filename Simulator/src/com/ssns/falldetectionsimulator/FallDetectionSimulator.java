@@ -11,8 +11,8 @@ public class FallDetectionSimulator {
 	static Map<String, Float[]> accMap = new HashMap<String, Float[]>();
 	static Map<String, Float[]> gyroMap = new HashMap<String, Float[]>();
 
-	static Float accDataset[][] = new Float[1000][4];
-	static Float gyroDataset[][] = new Float[1000][4];
+	static Float accDataset[][] = new Float[5000][4];
+	static Float gyroDataset[][] = new Float[5000][4];
 	private static float[] gyro = new float[3];
 	private static float omegaMagnitude;
 	public static final float EPSILON = 0.000000001f;
@@ -44,7 +44,7 @@ public class FallDetectionSimulator {
 	static private  float degreeFloat2;
 	private static long currentTime;
 	private static long prevtimestamp;
-	static FileWriter myWriter;
+	//static FileWriter myWriter;
 
 	static File fileAcc = null;
 	static File fileGyro = null;
@@ -53,6 +53,8 @@ public class FallDetectionSimulator {
 	static Pattern q = Pattern.compile("/.*(gyro_[0-9]+_[1].txt)$");
 	static Matcher m;
 	static String logPath;
+	static FileWriter finalResultWriter;
+	static Boolean fallDetected = false;
 
 	//myWriter.close();
 	static long min = 0;
@@ -64,20 +66,23 @@ public class FallDetectionSimulator {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0");
+		File file = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0");
+		File finalResultFile = new File("/Users/sjathin/Documents/GitHub/HumanActivityRecognition/Documents/MobiFall_Dataset_v2.0/finalLog.txt");
+		finalResultWriter = new FileWriter(finalResultFile);
 		fetchFiles(file, f -> System.out.printf(""));
+		finalResultWriter.close();
 	}
 
 
 	public static void testAlgorithm() throws IOException {
 		String nanoTime;
-		while(true) {
+		while(true && !fallDetected) {
 			// 2328285952000 2328284010000
 			nanoTime = String.valueOf(currentTime);
 			if (currentTime >= max) {
 				System.out.println("Completed");
-				myWriter.write("Completed"+ "\n");
-				myWriter.close();
+				//myWriter.write("Completed"+ "\n");
+				//myWriter.close();
 				break;
 			}
 			if(accMap.containsKey(nanoTime)){
@@ -92,7 +97,7 @@ public class FallDetectionSimulator {
 				totalSumVector = Math.sqrt(accel[0] * accel[0] + accel[1] * accel[1] + accel[2] * accel[2]);
 
 				//System.out.println("TotalSumVector: " + totalSumVector);
-				myWriter.write("TotalSumVector: " + totalSumVector + "\n");
+				//myWriter.write("TotalSumVector: " + totalSumVector + "\n");
 
 			}
 			if(gyroMap.containsKey(nanoTime)){
@@ -125,8 +130,11 @@ public class FallDetectionSimulator {
 			}
 			if(fileAcc != null && fileGyro != null){
 				logPath = fileAcc.getAbsolutePath().substring(0 , fileAcc.getAbsolutePath().lastIndexOf("/"));
+				finalResultWriter.write(logPath + "\n");
+				fallDetected = false;
 				readDataSets();
 				testAlgorithm();
+				finalResultWriter.write("---------------------------------------------------------------------"+ "\n");
 				fileAcc = null;
 				fileGyro = null;
 
@@ -289,7 +297,7 @@ public class FallDetectionSimulator {
 			//File fileGyro = new File("/Users/vineeth/Documents/HIS/Semester 2/SSNS/FallDetectionSystem/Documents/MobiFall_Dataset_v2.0/sub2/ADL/JOG/JOG_gyro_2_1.txt");
 			BufferedReader brGyro =new BufferedReader(new FileReader(fileGyro));
 
-			myWriter = new FileWriter(logPath+"/result.txt");
+			//myWriter = new FileWriter(logPath+"/result.txt");
 			
 			
 			String line = brAcc.readLine();
@@ -322,7 +330,10 @@ public class FallDetectionSimulator {
 				line2 = brGyro.readLine();
 			}
 			currentTime = min;
-		} catch(Exception e) {
+		} catch(IndexOutOfBoundsException e) {
+			System.out.println("ERROR");
+			fallDetected = true;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -445,11 +456,12 @@ public class FallDetectionSimulator {
 		//System.out.println("degreeFloat:"+degreeFloat);
         //System.out.println("degreeFloat2:"+degreeFloat2);
         //System.out.println("mAngularVelocityThreshold:"+omegaMagnitude);
-		myWriter.write("degreeFloat:"+degreeFloat+ "\n");
+		//myWriter.write("degreeFloat:"+degreeFloat+ "\n");
+
 
 
 		//myWriter.write("degreeFloat2:"+degreeFloat2+ "\n");
-		myWriter.write("mAngularVelocityThreshold:"+omegaMagnitude+ "\n");
+		//myWriter.write("mAngularVelocityThreshold:"+omegaMagnitude+ "\n");
 
 
         if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
@@ -458,8 +470,6 @@ public class FallDetectionSimulator {
             //String textMsg = "Hello, I have fallen down here-> " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "need help immediately!!";
             String textMsg = "Sorry by mistake";
             //smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
-            System.out.println("SMS Sent");
-			myWriter.write("SMS Sent"+ "\n");
         }
 
         //if (totalSumVector < mLowerAccFallThreshold){
@@ -469,13 +479,15 @@ public class FallDetectionSimulator {
                         if(startTimer == 0){
                             startTimer = System.currentTimeMillis();
                         }
-                            System.out.println("Notification!!!");
-							System.out.println("degreeFloat:"+degreeFloat);
-							System.out.println("degreeFloat2:"+degreeFloat2);
-							System.out.println("omegaMagnitude : " + mAngularVelocityThreshold);
-							System.out.println("SMV : " + totalSumVector);
-							myWriter.write("FALL !!!!! DANGER"+ "\n");
 
+							//myWriter.write("FALL !!!!! DANGER"+ "\n");
+							finalResultWriter.write("FALL Detected" + "\n");
+							finalResultWriter.write("degreeFloat: "+degreeFloat+"\n");
+							finalResultWriter.write("degreeFloat2: "+degreeFloat2+"\n");
+							finalResultWriter.write("omegaMagnitude: "+mAngularVelocityThreshold+"\n");
+							finalResultWriter.write("SMV: "+totalSumVector+"\n");
+							finalResultWriter.write("Nanoseconds: " + currentTime+"\n");
+							fallDetected = true;
                           //  startAlert();
                            // System.out.printf("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(FallDetectionSimulator.getLatitude()) + "," + String.valueOf(FallDetectionSimulator.getLongitude()));
                     }
