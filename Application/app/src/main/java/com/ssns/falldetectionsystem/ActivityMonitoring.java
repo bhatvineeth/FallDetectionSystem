@@ -82,6 +82,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
     private static float degreeFloat2;
 
     public static boolean alarmFlag = false;
+    int f = 0;
 
     public static long startTimer = 0;
 
@@ -499,7 +500,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                             }
                                 createChannels();
                                 Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
-                                getManager().notify(101, nb.build());
+                                getManager().notify(101 + (f++), nb.build());
                                 Log.d("Notification!!!", "Notification Sent");
                                 startAlert();
                                 Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
