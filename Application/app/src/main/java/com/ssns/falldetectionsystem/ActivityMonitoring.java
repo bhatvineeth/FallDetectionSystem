@@ -93,6 +93,8 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public static boolean userConfirmation= false;
 
+    private static  char sentRecently = 'N';
+
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
         String locationProvider = LocationManager.NETWORK_PROVIDER;
@@ -491,7 +493,7 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                 Intent stopIntent = new Intent(getApplicationContext(), RingtonePlayingService.class);
                 getApplicationContext().stopService(stopIntent);
             }
-            //if (totalSumVector < mLowerAccFallThreshold){
+            if (sentRecently == 'N'){
                 if (totalSumVector > mUpperAccFallThreshold) {
                     if ( omegaMagnitude > mAngularVelocityThreshold) {
                         if (degreeFloat > mTiltValue || degreeFloat2 > mTiltValue) {
@@ -499,15 +501,16 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
                                 startTimer = System.currentTimeMillis();
                             }
                                 createChannels();
+                                setSentRecently('Y');
                                 Notification.Builder nb = getAndroidChannelNotification("Confirmation", "Fall Detected, are you able to continue?");
-                                getManager().notify(101 + (f++), nb.build());
+                                getManager().notify(101 , nb.build());
                                 Log.d("Notification!!!", "Notification Sent");
                                 startAlert();
                                 Log.d("DANGER!!!", "User location at => " + "https://www.google.com/maps/search/?api=1&query=" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()));
                         }
                     }
                 }
-            //}
+            }
 
             gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
             System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
@@ -588,5 +591,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
 
     public static void setAlarmFlag(boolean alarmFlag) {
         ActivityMonitoring.alarmFlag = alarmFlag;
+    }
+
+    public static void setSentRecently(char sentRecently) {
+        ActivityMonitoring.sentRecently = sentRecently;
     }
 }

@@ -30,8 +30,10 @@ public class AlarmReceiver extends BroadcastReceiver {
             notificationManager.cancel(101);
             ActivityMonitoring.startTimer = 0;
             ActivityMonitoring.setAlarmFlag(true);
+            ActivityMonitoring.setSentRecently('N');
             Intent stopIntent = new Intent(context, RingtonePlayingService.class);
             context.stopService(stopIntent);
+
         }
 
 
