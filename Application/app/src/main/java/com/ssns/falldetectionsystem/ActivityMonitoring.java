@@ -447,9 +447,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         //private double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
         //private double mTiltValue = 60; // 60 deg
         private double mLowerAccFallThreshold = 1; // 0.71g
-        private double mUpperAccFallThreshold = 10; // 1.95g
-        private double mAngularVelocityThreshold = 0.0001; // 1.52 deg / s
-        private double mTiltValue = 1; // 60 deg
+        private double mUpperAccFallThreshold = 21; // 1.95g
+        private double mAngularVelocityThreshold = 3.1; // 1.52 deg / s
+        private double mTiltValue = 60; // 60 deg
         private double mTilt;
         private double mDelay;
         private boolean mUserConfirmation;
