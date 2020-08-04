@@ -5,104 +5,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="16dp"
+    android:orientation="vertical"
     android:visibility="visible"
     tools:context=".MainActivity"
     tools:visibility="visible">
 
-    <Button
-        android:text="@string/login"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="399dp"
+        android:layout_height="378dp"
+        android:layout_weight="55"
+        android:fontFamily="sans-serif"
+        android:text="FALL       DETECTION SYSTEM USING SENSORS EMBEDDED IN SMARTPHONES"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="50sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/logMessage"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="55"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="18sp"
+        android:visibility="visible" />
+
+    <Button
         android:id="@+id/login"
-        android:layout_marginTop="10dp" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:enabled="true"
+        android:text="@string/login"
+        android:textColor="#000000"
+        android:textStyle="bold" />
 
     <Button
-        android:text="@string/logout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/logout"
-        android:layout_marginTop="10dp" />
-
-
-    <!-- <TextView
-        android:id="@+id/label_light"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/label_light"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginTop="10dp"
+        android:enabled="false"
+        android:text="@string/logout"
+        android:textColor="#040303"
+        android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/label_proximity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_proximity"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_light" />
-
-    <TextView
-        android:id="@+id/linear_acceleration_x"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/linear_acceleration_x"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_proximity" />
-
-    <TextView
-        android:id="@+id/linear_acceleration_y"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/linear_acceleration_y"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_x" />
-
-    <TextView
-        android:id="@+id/linear_acceleration_z"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/linear_acceleration_z"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_y" />
-
-    <TextView
-        android:id="@+id/totalSumVector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/totalSumVector"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linear_acceleration_z" />
-
-    <TextView
-        android:id="@+id/rotation_x"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rotation_x"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/totalSumVector" />
-
-    <TextView
-        android:id="@+id/rotation_y"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rotation_y"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotation_x" />
-
-    <TextView
-        android:id="@+id/rotation_z"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rotation_z"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotation_y" />
-
-    <TextView
-        android:id="@+id/angular_velocity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/angular_velocity"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotation_z" /> -->
 
 
 </LinearLayout>

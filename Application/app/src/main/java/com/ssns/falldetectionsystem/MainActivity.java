@@ -57,6 +57,12 @@ public class MainActivity extends Activity {
         login.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                TextView logMessage = (TextView)findViewById(R.id.logMessage);
+                logMessage.setText("Log in successful");
+                Button loginButon = (Button) findViewById(R.id.login);
+                loginButon.setEnabled(false);
+                Button logoutButon = (Button) findViewById(R.id.logout);
+                logoutButon.setEnabled(true);
                 Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
                 startService(intent);
             }
@@ -66,8 +72,11 @@ public class MainActivity extends Activity {
         logout.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                TextView logMessage = (TextView)findViewById(R.id.logMessage);
+                logMessage.setText("Log out successful");
+                Button loginButon = (Button) findViewById(R.id.login);
+                loginButon.setEnabled(true);
                 Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
-
                 stopService(intent);
             }
 
