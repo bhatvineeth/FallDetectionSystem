@@ -1509,3 +1509,8 @@ Documents/MobiFall_Dataset_v2.0/sub9/FALLS/FOL/FOL_ori_9_2.txt
 Documents/MobiFall_Dataset_v2.0/sub9/FALLS/FOL/FOL_ori_9_3.txt
 Simulator/out/production/Simulator/com/ssns/falldetectionsimulator/FallDetectionSimulator.class
 test.txt
+Simulator/FallDetectionSimulator.iml
+Simulator/.idea/vcs.xml
+Simulator/.idea/modules.xml
+Simulator/.idea/misc.xml
+Simulator/.idea/.name

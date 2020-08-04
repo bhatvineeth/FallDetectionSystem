@@ -34,8 +34,8 @@ public class FallDetectionSimulator {
 	public static long startTimer = 0;
 
     private static double mLowerAccFallThreshold = 6.962721499999999; // 0.71g
-    private static double mUpperAccFallThreshold = 19.122967499999998; // 1.95g
-    private static double mAngularVelocityThreshold = 0.026529; // 1.52 deg / s
+    private static double mUpperAccFallThreshold = 21; // 2.14285g
+    private static double mAngularVelocityThreshold = 3.1; // 1.52 deg / s
     private static double mTiltValue = 60; // 60 deg
 
 
@@ -458,7 +458,7 @@ public class FallDetectionSimulator {
         //System.out.println("mAngularVelocityThreshold:"+omegaMagnitude);
 		//myWriter.write("degreeFloat:"+degreeFloat+ "\n");
 
-
+		//System.out.println("omegaMagnitude: "+omegaMagnitude);
 
 		//myWriter.write("degreeFloat2:"+degreeFloat2+ "\n");
 		//myWriter.write("mAngularVelocityThreshold:"+omegaMagnitude+ "\n");
@@ -484,7 +484,8 @@ public class FallDetectionSimulator {
 							finalResultWriter.write("FALL Detected" + "\n");
 							finalResultWriter.write("degreeFloat: "+degreeFloat+"\n");
 							finalResultWriter.write("degreeFloat2: "+degreeFloat2+"\n");
-							finalResultWriter.write("omegaMagnitude: "+mAngularVelocityThreshold+"\n");
+							finalResultWriter.write("omegaMagnitude: "+omegaMagnitude+"\n");
+							//System.out.println("omegaMagnitude: "+omegaMagnitude);
 							finalResultWriter.write("SMV: "+totalSumVector+"\n");
 							finalResultWriter.write("Nanoseconds: " + currentTime+"\n");
 							fallDetected = true;
