@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
 //            return;
         }
 
+        final Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
 
         //TODO: CHECK LOGIN, THEN START SERVICE
         login.setOnClickListener(new View.OnClickListener(){
@@ -63,7 +64,7 @@ public class MainActivity extends Activity {
                 loginButon.setEnabled(false);
                 Button logoutButon = (Button) findViewById(R.id.logout);
                 logoutButon.setEnabled(true);
-                Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
+
                 startService(intent);
             }
         });
@@ -76,7 +77,7 @@ public class MainActivity extends Activity {
                 logMessage.setText("Log out successful");
                 Button loginButon = (Button) findViewById(R.id.login);
                 loginButon.setEnabled(true);
-                Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
+                //Intent intent= new Intent(getApplicationContext(), ActivityMonitoring.class);
                 stopService(intent);
             }
 

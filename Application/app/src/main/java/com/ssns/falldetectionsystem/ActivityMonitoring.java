@@ -403,14 +403,16 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
         //mPeriodicEventHandler.removeCallbacks(doPeriodicTask);
         stopSelf();
         Log.d("Stopping Service", "OnDestroy");
-        //mSensorManager.unregisterListener(this);
+        mSensorManager.unregisterListener(this);
         //sendCount = 0;
-        //Toast.makeText(this, "Stopped Tracking", Toast.LENGTH_SHORT).show();
-        //if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        //oast.makeText(this, "Stopped Tracking", Toast.LENGTH_SHORT).show();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        //}else {
-           // locationManager.removeUpdates(locationListener);
-       // }
+        }else {
+            locationManager.removeUpdates(locationListener);
+        }
+        timer.cancel();
+        timer.purge();
     }
 
     public static float[] getGyroOrientation() {
