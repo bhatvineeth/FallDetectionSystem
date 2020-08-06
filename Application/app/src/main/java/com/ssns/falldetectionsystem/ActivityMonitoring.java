@@ -488,9 +488,9 @@ public class ActivityMonitoring extends Service implements SensorEventListener {
             if( startTimer != 0 && ((System.currentTimeMillis() - startTimer)>=30000)){
                 //send sms
                 startTimer = 0;
-                String textMsg = "Hello, I have fallen down here-> " + "http://www.google.com/maps/place/" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "  need help immediately!!";
+                String textMsg = "Hello, Vineeth's phone has detected a fall here: -> " + "http://www.google.com/maps/place/" + String.valueOf(ActivityMonitoring.getLatitude()) + "," + String.valueOf(ActivityMonitoring.getLongitude()) + "  Please contact him incase of any assistance needed.";
                 //String textMsg = "Sorry by mistake";
-                smsManager.sendTextMessage("017645967191", null, textMsg, null, null);
+                smsManager.sendTextMessage("015906196190", null, textMsg, null, null);
                 Log.d("SMS!!!", "SMS Sent");
                 Intent stopIntent = new Intent(getApplicationContext(), RingtonePlayingService.class);
                 getApplicationContext().stopService(stopIntent);
